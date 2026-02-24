@@ -37,7 +37,7 @@ Key features include:
 | Product Owner & Developer | Leia Yun | [@yunLeia](https://github.com/yunLeia) | sy3544@nyu.edu |
 | Scrum Master & Developer | Layan Alyas | [@layan-al](https://github.com/layan-al) | laa9624@nyu.edu |
 | Developer | Aayan Mathur | [@aayanmathur](https://github.com/aayanmathur) | am12611@nyu.edu |
-| Developer | [Name] | [@username](https://github.com/username) | emailAddress |
+| Developer | Tianlang Qin | [@tianlangqin](https://github.com/tianlangqin) | tq2098@nyu.edu |
 | Developer | [Name] | [@username](https://github.com/username) | emailAddress |
 
 ---
