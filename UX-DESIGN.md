@@ -1,4 +1,4 @@
-# StudySpot — UX Design
+# StudySpot: UX Design
 
 ## Prototype
 **Figma Prototype:** https://www.figma.com/proto/tJ5e8MQPpcdZxXcQ8R1nx4/StudySpot?node-id=0-1&t=QkFcxlqE85c668rE-1
@@ -60,19 +60,19 @@ Key actions: “Apply” returns to Spot List with filters applied.
 Purpose: View a spot’s details (location, hours, busyness, rating, description).  
 Key actions: “Save” triggers saved confirmation; “[Update]” triggers busyness overlay; “Rate Spot” triggers rate/review overlay.
 
-### 8) Spot Details — Saved Overlay
+### 8) Spot Details: Saved Overlay
 ![Saved Overlay](<./ux-design/Spot Details_ Saved Overlay (1).png>)
 
 Purpose: Confirms the spot was saved successfully.  
 Key actions: “Done” returns to Spot Details.
 
-### 9) Spot Details — Busyness Overlay
+### 9) Spot Details: Busyness Overlay
 ![Busyness Overlay](<./ux-design/Spot Details_ Busyness Overlay (1).png>)
 
 Purpose: User updates current busyness (quiet/moderate/busy).  
 Key actions: “Done” returns to Spot Details.
 
-### 10) Spot Details — Review / Rate Overlay
+### 10) Spot Details: Review / Rate Overlay
 ![Review Overlay](<./ux-design/Review Overlay.png>)
 
 Purpose: User submits a star rating and short review.  
