@@ -86,13 +86,13 @@ Key actions: “Post” returns to Spot Details.
 Purpose: User submits a new study spot (name, address, hours, description, image).  
 Key actions: “Submit” attempts submission.
 
-### 12) Add Spot — Success
+### 12) Add Spot: Success
 ![Add Spot Success](<./ux-design/Add Spot - Success (1).png>)
 
 Purpose: Confirms the new spot was added.  
 Key actions: “Done” returns to Add Spot or navigates back to browsing (prototype decision).
 
-### 13) Add Spot — Error
+### 13) Add Spot: Error
 ![Add Spot Error](<./ux-design/Add Spot - Error (1).png>)
 
 Purpose: Handles submission failure.  
@@ -112,7 +112,7 @@ Key actions: “Remove from Saved Spots” triggers remove confirmation overlay.
 Purpose: Confirms user wants to remove a saved spot.  
 Key actions: “Remove” proceeds to success confirmation.
 
-### 16) Remove Saved Spot — Success
+### 16) Remove Saved Spot: Success
 ![Remove Saved Spot Success](<./ux-design/Remove Saved Spot Success.png>)
 
 Purpose: Confirms the saved spot was removed.  
