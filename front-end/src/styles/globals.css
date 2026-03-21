@@ -1,0 +1,87 @@
+/*
+ * globals.css
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Single source of truth for StudySpot's design tokens.
+ * Import this in index.js (already done). Do NOT import it in individual pages.
+ *
+ * To add a new page:
+ *   1. Create src/pages/YourPage.js
+ *   2. Add a <Route> in App.js
+ *   3. Use the CSS variables below for colors/spacing — no inline styles.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+/* ── Google Font import ── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap');
+
+/* ── Design Tokens ── */
+:root {
+  /* Colors */
+  --color-bg:           #F7F6F3;   /* warm off-white page background */
+  --color-surface:      #FFFFFF;   /* card / input surface */
+  --color-border:       #E4E2DC;   /* subtle borders */
+  --color-text-primary: #1A1A1A;   /* headings, primary copy */
+  --color-text-secondary: #6B6860; /* labels, hints */
+  --color-accent:       #3D6B4F;   /* StudySpot green — buttons, links */
+  --color-accent-hover: #2F5340;   /* darker green on hover */
+  --color-accent-light: #EBF2EE;   /* tinted green for chips/badges */
+  --color-error:        #C0392B;   /* validation errors */
+  --color-star:         #E8A838;   /* star ratings */
+
+  /* Typography */
+  --font-display: 'DM Serif Display', serif;   /* logo / page titles */
+  --font-body:    'DM Sans', sans-serif;        /* everything else */
+
+  /* Spacing scale */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* ── Base Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+input, textarea, select {
+  font-family: var(--font-body);
+}
