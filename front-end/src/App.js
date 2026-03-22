@@ -18,12 +18,13 @@
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-import LoginPage         from './pages/LoginPage';
-import SignUpPage        from './pages/SignUpPage';
-import VerifyEmailPage   from './pages/VerifyEmailPage';
+// TODO: teammates — import your pages here as you build them, e.g.:
+import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import ChoosePasswordPage from './pages/ChoosePasswordPage';
-import SpotDetailsPage   from './pages/SpotDetailsPage';
-import SpotListPage      from './pages/SpotListPage';
+import SpotDetailsPage from './pages/SpotDetailsPage';
+import SpotListPage from './pages/SpotListPage';
 // import SavedSpotsPage  from './pages/SavedSpotsPage';
 // import AddSpotPage     from './pages/AddSpotPage';
 // import SettingsPage    from './pages/SettingsPage';
@@ -33,15 +34,15 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* Auth flow */}
-        <Route path="/login"           element={<LoginPage />} />
-        <Route path="/signup"          element={<SignUpPage />} />
-        <Route path="/verify-email"    element={<VerifyEmailPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/choose-password" element={<ChoosePasswordPage />} />
 
         {/* Main app */}
-        <Route path="/spots/:id"       element={<SpotDetailsPage />} />
+        <Route path="/spots/:id" element={<SpotDetailsPage />} />
 
-        <Route path="/spots"         element={<SpotListPage />} />
+        <Route path="/spots" element={<SpotListPage />} />
 
         {/* TODO: teammates — add your routes here */}
         {/* <Route path="/saved"         element={<SavedSpotsPage />} /> */}
