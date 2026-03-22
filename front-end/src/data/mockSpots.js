@@ -1,10 +1,6 @@
 /**
  * Mock spot data
  *
- * Single source of truth for study-spot mock data used during front-end
- * development. Every page that needs spot data should import from here
- * instead of defining its own copy.
- *
  * This file will be replaced by real API calls during the back-end sprint.
  */
 
@@ -25,9 +21,9 @@ export const MOCK_SPOTS = [
     amenities: ['Outlets', 'Strong WiFi', 'Quiet Zone', 'Accessible'],
     hours: [
       { day: 'Mon – Thu', time: '8:00 AM – 2:00 AM' },
-      { day: 'Friday',    time: '8:00 AM – 10:00 PM' },
-      { day: 'Saturday',  time: '10:00 AM – 10:00 PM' },
-      { day: 'Sunday',    time: '10:00 AM – 2:00 AM' },
+      { day: 'Friday', time: '8:00 AM – 10:00 PM' },
+      { day: 'Saturday', time: '10:00 AM – 10:00 PM' },
+      { day: 'Sunday', time: '10:00 AM – 2:00 AM' },
     ],
     imageUrl: 'https://picsum.photos/seed/spot1/600/300',
   },
@@ -63,8 +59,8 @@ export const MOCK_SPOTS = [
     amenities: ['Outlets', 'Strong WiFi', 'Whiteboards', '3D Printers'],
     hours: [
       { day: 'Mon – Fri', time: '9:00 AM – 10:00 PM' },
-      { day: 'Saturday',  time: '10:00 AM – 6:00 PM' },
-      { day: 'Sunday',    time: 'Closed' },
+      { day: 'Saturday', time: '10:00 AM – 6:00 PM' },
+      { day: 'Sunday', time: 'Closed' },
     ],
     imageUrl: 'https://picsum.photos/seed/spot3/600/300',
   },
