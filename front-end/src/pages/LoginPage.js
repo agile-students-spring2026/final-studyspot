@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import styles from './AuthPages.module.css';
@@ -8,6 +8,7 @@ export default function LoginPage() {
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]       = useState('');
+  const navigate                = useNavigate();
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -24,6 +25,7 @@ export default function LoginPage() {
 
     // TODO: call auth API here
     console.log('Login submitted', { email, password });
+    navigate('/spots');
   }
 
   return (

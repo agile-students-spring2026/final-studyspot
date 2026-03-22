@@ -40,7 +40,7 @@ export default function ChoosePasswordPage() {
 
     // TODO: call API to set password and complete registration
     console.log('Account created for', email);
-    navigate('/');   // Navigate to main app (Spot List)
+    navigate('/spots');   // Navigate to main app (Spot List)
   }
 
   return (

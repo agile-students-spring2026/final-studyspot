@@ -3,7 +3,7 @@ import styles from './Button.module.css';
 /**
  * Button
  * Props:
- *   variant  – 'primary' (default) | 'secondary'
+ *   variant  – 'primary' (default) | 'secondary' | 'compact' | 'compactOutline'
  *   disabled – boolean
  *   onClick  – handler
  *   type     – 'button' (default) | 'submit'
