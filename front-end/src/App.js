@@ -23,6 +23,8 @@ import SignUpPage        from './pages/SignUpPage';
 import VerifyEmailPage   from './pages/VerifyEmailPage';
 import ChoosePasswordPage from './pages/ChoosePasswordPage';
 import SpotDetailsPage   from './pages/SpotDetailsPage';
+import SavedSpotsPage   from './pages/SavedSpotsPage';
+import ProfilePage       from './pages/ProfilePage';
 
 // TODO: teammates — import your pages here as you build them, e.g.:
 // import SpotListPage    from './pages/SpotListPage';
@@ -42,6 +44,10 @@ export default function App() {
 
         {/* Main app */}
         <Route path="/spots/:id"       element={<SpotDetailsPage />} />
+        <Route path="/saved"           element={<SavedSpotsPage />} />
+
+        {/* Profile page */}
+        <Route path="/profile"         element={<ProfilePage />} />
 
         {/* TODO: teammates — add your routes here */}
         {/* <Route path="/"              element={<SpotListPage />} /> */}
