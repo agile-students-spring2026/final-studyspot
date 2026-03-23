@@ -39,6 +39,34 @@
   background: var(--color-accent-light);
 }
 
+/* ── Compact variants (card actions, inline buttons) ── */
+.compact {
+  width: auto;
+  padding: 8px var(--space-5);
+  font-size: 13px;
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.compact:hover {
+  background: var(--color-accent-hover);
+}
+
+.compactOutline {
+  width: auto;
+  padding: 8px var(--space-4);
+  font-size: 13px;
+  background: none;
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.compactOutline:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
