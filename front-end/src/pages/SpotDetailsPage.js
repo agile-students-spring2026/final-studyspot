@@ -1,45 +1,21 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Button from '../components/Button';
+import { MOCK_SPOTS, BUSYNESS_LEVELS } from '../data/mockSpots';
 import styles from './SpotDetailsPage.module.css';
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * SpotDetailsPage
  *
  * Expects location.state.spot (passed from SpotListPage via <Link state=...>).
- * Falls back to MOCK_SPOT so the page works standalone during development.
+ * Falls back to first mock spot so the page works standalone during development.
  * ─────────────────────────────────────────────────────────────────────────────
  */
-
-const MOCK_SPOT = {
-  id: '1',
-  name: 'Bobst Library — 3rd Floor',
-  building: 'Bobst Library',
-  address: '70 Washington Square S',
-  rating: 4.3,
-  reviewCount: 84,
-  busyness: 65,          // percent 0–100
-  busynessLabel: 'Moderate',
-  description:
-    'Bright, open floor with plenty of table seating and individual carrels. ' +
-    'Great natural light from the atrium. Gets busy around midterms but the ' +
-    'upper mezzanine usually has open spots.',
-  amenities: ['Outlets', 'Strong WiFi', 'Quiet Zone', 'Accessible'],
-  hours: [
-    { day: 'Mon – Thu', time: '8:00 AM – 2:00 AM' },
-    { day: 'Friday',    time: '8:00 AM – 10:00 PM' },
-    { day: 'Saturday',  time: '10:00 AM – 10:00 PM' },
-    { day: 'Sunday',    time: '10:00 AM – 2:00 AM' },
-  ],
-  imageUrl: null,   // replace with real URL or import when images are available
-};
-
-const BUSYNESS_LEVELS = ['Empty', 'Light', 'Moderate', 'Packed'];
 
 export default function SpotDetailsPage() {
   const navigate           = useNavigate();
   const location           = useLocation();
-  const spot               = location.state?.spot ?? MOCK_SPOT;
+  const spot               = location.state?.spot ?? MOCK_SPOTS[0];
 
   const [saved, setSaved]               = useState(false);
   const [busyness, setBusyness]         = useState(spot.busyness);
