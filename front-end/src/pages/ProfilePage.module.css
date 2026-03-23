@@ -1,0 +1,104 @@
+.page {
+    min-height: 100vh;
+    background: var(--color-bg);
+    padding-bottom: 80px;
+}
+
+.header {
+    text-align: center;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.logo {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.title {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    text-align: center;
+    margin: var(--space-5) 0;
+    color: var(--color-text-primary);
+    }
+
+.profileSection {
+    text-align: center;
+    padding: var(--space-4);
+}
+
+.profileImage {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--color-border);
+    }
+
+.userName {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    margin: var(--space-4) 0 var(--space-1) 0;
+    color: var(--color-text-primary);
+}
+
+.userEmail {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.menu {
+    margin-top: var(--space-5);
+    display: flex;
+    flex-direction: column;
+}
+
+.menuItem {
+    display: block;
+    padding: var(--space-4);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    width: 100%;
+}
+
+.menuItem:last-child {
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* Bottom Navigation */
+.bottomNav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-around;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-3) 0;
+}
+
+.navItem {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+}
+
+.navItem.active {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
