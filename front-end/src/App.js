@@ -17,6 +17,8 @@
  */
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import SavedSpotsPage from './pages/SavedSpotsPage';
+import ProfilePage from './pages/ProfilePage';
 
 // TODO: teammates — import your pages here as you build them, e.g.:
 import LoginPage from './pages/LoginPage';
@@ -41,6 +43,10 @@ export default function App() {
 
         {/* Main app */}
         <Route path="/spots/:id" element={<SpotDetailsPage />} />
+        <Route path="/saved" element={<SavedSpotsPage />} />
+
+        {/* Profile page */}
+        <Route path="/profile" element={<ProfilePage />} />
 
         <Route path="/spots" element={<SpotListPage />} />
 
