@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import SearchBar from '../components/SearchBar';
+import FilterBottomSheet from '../components/FilterBottomSheet';
 import BottomNav from '../components/BottomNav';
 import Button from '../components/Button';
 import { MOCK_SPOTS } from '../data/mockSpots';
@@ -11,6 +12,10 @@ export default function SpotListPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [savedSpots, setSavedSpots] = useState([]);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filters, setFilters] = useState({ noiseLevel: '', outlets: '', wifi: '', busyness: '' });
+
+  const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
   function toggleSave(spotId) {
     setSavedSpots(prev =>
@@ -18,10 +23,22 @@ export default function SpotListPage() {
     );
   }
 
-  const filtered = MOCK_SPOTS.filter(spot =>
-    spot.name.toLowerCase().includes(search.toLowerCase()) ||
-    spot.building.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = MOCK_SPOTS.filter(spot => {
+    const matchesSearch =
+      spot.name.toLowerCase().includes(search.toLowerCase()) ||
+      spot.building.toLowerCase().includes(search.toLowerCase());
+    const matchesNoise =
+      !filters.noiseLevel || spot.noiseLevel === filters.noiseLevel;
+    const matchesOutlets =
+      !filters.outlets ||
+      (filters.outlets === 'Yes' ? spot.hasOutlets : !spot.hasOutlets);
+    const matchesWifi =
+      !filters.wifi ||
+      (filters.wifi === 'Yes' ? spot.hasWifi : !spot.hasWifi);
+    const matchesBusyness =
+      !filters.busyness || spot.busynessLabel === filters.busyness;
+    return matchesSearch && matchesNoise && matchesOutlets && matchesWifi && matchesBusyness;
+  });
 
   return (
     <div className={styles.page}>
@@ -30,6 +47,15 @@ export default function SpotListPage() {
       <SearchBar
         value={search}
         onChange={e => setSearch(e.target.value)}
+        onFilterClick={() => setFilterOpen(true)}
+        filterActive={hasActiveFilters}
+      />
+
+      <FilterBottomSheet
+        isOpen={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        onApply={setFilters}
+        initialFilters={filters}
       />
 
       <div className={styles.list}>

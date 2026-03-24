@@ -12,6 +12,8 @@ import styles from './SearchBar.module.css';
 export default function SearchBar({
   value,
   onChange,
+  onFilterClick,
+  filterActive,
 }) {
   return (
     <div className={styles.wrapper}>
@@ -27,8 +29,8 @@ export default function SearchBar({
           />
         </div>
         <button
-          className={styles.filterBtn}
-          disabled
+          className={`${styles.filterBtn} ${filterActive ? styles.filterBtnActive : ''}`}
+          onClick={onFilterClick}
         >
           <FilterIcon />
           Filter
