@@ -21,6 +21,7 @@ export default function SpotDetailsPage() {
   const [busyness, setBusyness]         = useState(spot.busyness);
   const [showBusyness, setShowBusyness] = useState(false);
   const [showRate, setShowRate]         = useState(false);
+  const [showSavedOverlay, setShowSavedOverlay] = useState(false);
 
   // Busyness overlay state
   const [selectedLevel, setSelectedLevel] = useState(null);
@@ -73,10 +74,15 @@ export default function SpotDetailsPage() {
           <button
             className={`${styles.saveBtn} ${saved ? styles.saveBtnActive : ''}`}
             onClick={() => {
-              setSaved(v => !v);
+              if (!saved) {
+                setSaved(true);
+                setShowSavedOverlay(true);
+              } else {
+                setSaved(false);
+              }
               // TODO: call API to save/unsave
-            }}
-          >
+    }}
+  >
             <BookmarkIcon filled={saved} />
             {saved ? 'Saved' : 'Save'}
           </button>
@@ -153,6 +159,19 @@ export default function SpotDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Saved confirmation overlay ── */}
+{showSavedOverlay && (
+  <div className={styles.overlay} onClick={() => setShowSavedOverlay(false)}>
+    <div className={styles.overlayCard} onClick={e => e.stopPropagation()}>
+      <h2 className={styles.overlayTitle}>Saved!</h2>
+      <p className={styles.savedMessage}>Added to Saved Spots</p>
+      <div className={styles.overlayActions}>
+        <Button onClick={() => setShowSavedOverlay(false)}>Done</Button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* ── Busyness overlay ── */}
       {showBusyness && (
