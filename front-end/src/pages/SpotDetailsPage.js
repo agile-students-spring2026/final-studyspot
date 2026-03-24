@@ -49,6 +49,11 @@ export default function SpotDetailsPage() {
     setSelectedStar(0);
     setReviewText('');
   }
+  function handleOpenMaps() {
+  const query = `${spot.name} ${spot.address}`;
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+}
 
   /* ── Render ── */
   return (
@@ -90,9 +95,16 @@ export default function SpotDetailsPage() {
 
         {/* Location + hours preview */}
         <div className={styles.metaRow}>
-          <span className={styles.metaItem}><PinIcon /> {spot.address}</span>
-          <span className={styles.metaItem}><ClockIcon /> {spot.hours[0].time}</span>
-        </div>
+  <span className={styles.metaItem}><PinIcon /> {spot.address}</span>
+  <span className={styles.metaItem}><ClockIcon /> {spot.hours[0].time}</span>
+</div>
+
+
+<div className={styles.directionsRow}>
+  <button className={styles.directionsBtn} onClick={handleOpenMaps}>
+    <PinIcon /> Get Directions
+  </button>
+</div>
 
         {/* Rating row */}
         <div className={styles.ratingRow}>
