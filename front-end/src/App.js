@@ -28,7 +28,7 @@ import ChoosePasswordPage from './pages/ChoosePasswordPage';
 import SpotDetailsPage from './pages/SpotDetailsPage';
 import SpotListPage from './pages/SpotListPage';
 // import SavedSpotsPage  from './pages/SavedSpotsPage';
-// import AddSpotPage     from './pages/AddSpotPage';
+import AddSpotPage from './pages/AddSpotPage';
 // import SettingsPage    from './pages/SettingsPage';
 
 export default function App() {
@@ -49,10 +49,12 @@ export default function App() {
         <Route path="/profile" element={<ProfilePage />} />
 
         <Route path="/spots" element={<SpotListPage />} />
+        <Route path="/add-spot" element={<AddSpotPage />} /> */
+
 
         {/* TODO: teammates — add your routes here */}
         {/* <Route path="/saved"         element={<SavedSpotsPage />} /> */}
-        {/* <Route path="/add-spot"      element={<AddSpotPage />} /> */}
+        
         {/* <Route path="/settings"      element={<SettingsPage />} /> */}
 
         {/* Default: redirect to login */}
