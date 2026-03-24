@@ -6,6 +6,12 @@ import BottomNav from '../components/BottomNav';
 import Button from '../components/Button';
 import styles from './SpotListPage.module.css';
 
+const FILTER_OPTIONS = [
+  { key: 'quiet', label: 'Quiet' },
+  { key: 'outlets', label: 'Has outlets' },
+  { key: 'group', label: 'Group-friendly' },
+];
+
 const MOCK_SPOTS = [
   {
     id: '1',
@@ -83,21 +89,54 @@ const MOCK_SPOTS = [
   },
 ];
 
+
 export default function SpotListPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [savedSpots, setSavedSpots] = useState([]);
+  const [activeFilters, setActiveFilters] = useState([]);
 
   function toggleSave(spotId) {
     setSavedSpots(prev =>
       prev.includes(spotId) ? prev.filter(id => id !== spotId) : [...prev, spotId]
     );
   }
-
-  const filtered = MOCK_SPOTS.filter(spot =>
-    spot.name.toLowerCase().includes(search.toLowerCase()) ||
-    spot.building.toLowerCase().includes(search.toLowerCase())
+function toggleFilter(filterKey) {
+  setActiveFilters(prev =>
+    prev.includes(filterKey)
+      ? prev.filter(key => key !== filterKey)
+      : [...prev, filterKey]
   );
+}
+
+function matchesFilter(spot, filterKey) {
+  switch (filterKey) {
+    case 'quiet':
+      return spot.amenities.includes('Quiet Zone') || spot.busyness <= 40;
+    case 'outlets':
+      return spot.amenities.includes('Outlets');
+    case 'group':
+      return (
+        spot.amenities.includes('Group Tables') ||
+        spot.amenities.includes('Whiteboards')
+      );
+    default:
+      return true;
+  }
+}
+
+
+  const filtered = MOCK_SPOTS.filter(spot => {
+  const matchesSearch =
+    spot.name.toLowerCase().includes(search.toLowerCase()) ||
+    spot.building.toLowerCase().includes(search.toLowerCase());
+
+  const matchesActiveFilters = activeFilters.every(filterKey =>
+    matchesFilter(spot, filterKey)
+  );
+
+  return matchesSearch && matchesActiveFilters;
+});
 
   return (
     <div className={styles.page}>
@@ -108,9 +147,37 @@ export default function SpotListPage() {
         onChange={e => setSearch(e.target.value)}
       />
 
+      <div className={styles.filtersSection}>
+  <div className={styles.filtersHeader}>
+    <p className={styles.filtersTitle}>What do you need right now?</p>
+    {activeFilters.length > 0 && (
+      <button
+        className={styles.clearFiltersBtn}
+        onClick={() => setActiveFilters([])}
+      >
+        Clear
+      </button>
+    )}
+  </div>
+
+  <div className={styles.filterChips}>
+    {FILTER_OPTIONS.map(filter => (
+      <button
+        key={filter.key}
+        className={`${styles.filterChip} ${
+          activeFilters.includes(filter.key) ? styles.filterChipActive : ''
+        }`}
+        onClick={() => toggleFilter(filter.key)}
+      >
+        {filter.label}
+      </button>
+    ))}
+  </div>
+</div>
+
       <div className={styles.list}>
         {filtered.length === 0 && (
-          <p className={styles.empty}>No spots match your search.</p>
+          <p className={styles.empty}>No spots match your search or filters.</p>
         )}
         {filtered.map(spot => (
           <div key={spot.id} className={styles.card}>
