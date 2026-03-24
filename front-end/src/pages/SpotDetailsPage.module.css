@@ -295,6 +295,13 @@
   margin-bottom: var(--space-5);
 }
 
+.savedMessage {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-5);
+  text-align: center;
+}
+
 /* Busyness overlay — level selector */
 .levelGrid {
   display: grid;
