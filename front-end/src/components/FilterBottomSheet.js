@@ -48,17 +48,13 @@ export default function FilterBottomSheet({
             <h3 className={styles.sectionTitle}>{label}</h3>
             <div className={styles.radioGroup}>
               {options.map(option => (
-                <label key={option} className={styles.radioLabel}>
+                <label
+                  key={option}
+                  className={styles.radioLabel}
+                  onClick={() => handleSelect(key, option)}
+                >
                   <span
                     className={`${styles.radio} ${selected[key] === option ? styles.radioActive : ''}`}
-                  />
-                  <input
-                    type="radio"
-                    name={key}
-                    value={option}
-                    checked={selected[key] === option}
-                    onChange={() => handleSelect(key, option)}
-                    className={styles.radioInput}
                   />
                   {option}
                 </label>
