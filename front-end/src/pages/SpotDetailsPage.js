@@ -4,6 +4,7 @@ import Button from '../components/Button';
 import { MOCK_SPOTS, BUSYNESS_LEVELS } from '../data/mockSpots';
 import styles from './SpotDetailsPage.module.css';
 
+
 /* ─────────────────────────────────────────────────────────────────────────────
  * SpotDetailsPage
  *
@@ -12,16 +13,55 @@ import styles from './SpotDetailsPage.module.css';
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
+const INITIAL_BOBST_AREAS = [
+  {
+    name: '1st Floor',
+    description: 'More social and better for quick meetups or short study blocks.',
+    tags: ['Social', 'Quick stop'],
+    current: 'Busy',
+  },
+  {
+    name: '3rd–4th Floors',
+    description: 'Usually quieter and better for solo focus.',
+    tags: ['Quiet', 'Deep focus'],
+    current: 'Moderate',
+  },
+  {
+    name: 'LL1',
+    description: 'Better for longer sessions, especially if you need outlets nearby.',
+    tags: ['Outlets', 'Long session'],
+    current: 'Quiet',
+  },
+  {
+    name: 'LL2',
+    description: 'More tucked away and quieter for focused work.',
+    tags: ['Very quiet', 'Solo study'],
+    current: 'Quiet',
+  },
+  {
+    name: 'Group Study Areas',
+    description: 'Better for collaborative work and discussion-based studying.',
+    tags: ['Group work', 'Collaborative'],
+    current: 'Moderate',
+  },
+];
+
 export default function SpotDetailsPage() {
   const navigate           = useNavigate();
   const location           = useLocation();
   const spot               = location.state?.spot ?? MOCK_SPOTS[0];
+  const isBobst = spot.name.toLowerCase().includes('bobst');
 
   const [saved, setSaved]               = useState(false);
   const [busyness, setBusyness]         = useState(spot.busyness);
   const [showBusyness, setShowBusyness] = useState(false);
   const [showRate, setShowRate]         = useState(false);
   const [showSavedOverlay, setShowSavedOverlay] = useState(false);
+
+const [bobstAreas, setBobstAreas] = useState(INITIAL_BOBST_AREAS);
+const [showAreaUpdate, setShowAreaUpdate] = useState(false);
+const [selectedAreaName, setSelectedAreaName] = useState('');
+const [selectedAreaStatus, setSelectedAreaStatus] = useState(null);
 
   // Busyness overlay state
   const [selectedLevel, setSelectedLevel] = useState(null);
@@ -49,12 +89,36 @@ export default function SpotDetailsPage() {
     setSelectedStar(0);
     setReviewText('');
   }
+
   function handleOpenMaps() {
   const query = `${spot.name} ${spot.address}`;
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
   window.open(mapsUrl, '_blank', 'noopener,noreferrer');
 }
 
+function openAreaUpdate(area) {
+  setSelectedAreaName(area.name);
+  setSelectedAreaStatus(area.current);
+  setShowAreaUpdate(true);
+}
+
+function handleAreaUpdateSubmit() {
+  if (!selectedAreaStatus) return;
+
+  setBobstAreas(prev =>
+    prev.map(area =>
+      area.name === selectedAreaName
+        ? { ...area, current: selectedAreaStatus }
+        : area
+    )
+  );
+
+  setShowAreaUpdate(false);
+  setSelectedAreaName('');
+  setSelectedAreaStatus(null);
+}
+
+  
   /* ── Render ── */
   return (
     <div className={styles.page}>
@@ -142,6 +206,79 @@ export default function SpotDetailsPage() {
           </span>
         </div>
 
+      {isBobst && (
+  <div className={styles.microSection}>
+    <div className={styles.microHeaderRow}>
+      <div>
+        <p className={styles.sectionLabel}>Inside Bobst</p>
+        <h3 className={styles.microTitle}>Best areas based on how you want to study</h3>
+      </div>
+      <span className={styles.microBadge}>Pilot</span>
+    </div>
+
+    <div className={styles.microCards}>
+      {bobstAreas.map(area => (
+        <div key={area.name} className={styles.microCard}>
+          <div className={styles.microTopRow}>
+            <h4 className={styles.microCardTitle}>{area.name}</h4>
+
+            <div className={styles.microRightSide}>
+              <span className={styles.microStatus}>{area.current}</span>
+              <button
+                className={styles.microUpdateBtn}
+                onClick={() => openAreaUpdate(area)}
+              >
+                Update
+              </button>
+            </div>
+          </div>
+
+          <p className={styles.microDesc}>{area.description}</p>
+
+          <div className={styles.microTags}>
+            {area.tags.map(tag => (
+              <span key={tag} className={styles.microTag}>{tag}</span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+        
+        {showAreaUpdate && (
+  <div className={styles.overlay} onClick={() => setShowAreaUpdate(false)}>
+    <div className={styles.overlayCard} onClick={e => e.stopPropagation()}>
+      <h2 className={styles.overlayTitle}>
+        How busy is {selectedAreaName} right now?
+      </h2>
+
+      <div className={styles.areaStatusGrid}>
+        {['Quiet', 'Moderate', 'Busy'].map(status => (
+          <button
+            key={status}
+            className={`${styles.levelBtn} ${
+              selectedAreaStatus === status ? styles.levelBtnActive : ''
+            }`}
+            onClick={() => setSelectedAreaStatus(status)}
+          >
+            {status}
+          </button>
+        ))}
+      </div>
+
+      <div className={styles.overlayActions}>
+        <Button variant="secondary" onClick={() => setShowAreaUpdate(false)}>
+          Cancel
+        </Button>
+        <Button disabled={!selectedAreaStatus} onClick={handleAreaUpdateSubmit}>
+          Submit
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
+
         {/* Amenities */}
         <div style={{ marginBottom: 'var(--space-5)' }}>
           <p className={styles.sectionLabel}>Amenities</p>
@@ -163,11 +300,11 @@ export default function SpotDetailsPage() {
           <p className={styles.sectionLabel}>Hours</p>
           <div className={styles.hoursGrid}>
             {spot.hours.map(h => (
-              <>
-                <span key={h.day + '-day'} className={styles.hoursDay}>{h.day}</span>
-                <span key={h.day + '-time'} className={styles.hoursTime}>{h.time}</span>
-              </>
-            ))}
+  <div key={h.day} style={{ display: 'contents' }}>
+    <span className={styles.hoursDay}>{h.day}</span>
+    <span className={styles.hoursTime}>{h.time}</span>
+  </div>
+))}
           </div>
         </div>
       </div>
