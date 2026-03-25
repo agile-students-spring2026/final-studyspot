@@ -107,7 +107,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-2);
 }
 
 .metaItem {
@@ -213,119 +213,6 @@
 .busynessNote {
   font-size: 12px;
   color: var(--color-text-secondary);
-}
-
-.microSection {
-  margin-bottom: var(--space-5);
-}
-
-.microHeaderRow {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
-}
-
-.microTitle {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 400;
-  color: var(--color-text-primary);
-  line-height: 1.25;
-}
-
-.microBadge {
-  background: var(--color-accent-light);
-  color: var(--color-accent);
-  border-radius: 999px;
-  padding: 5px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.microCards {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.microCard {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  box-shadow: var(--shadow-card);
-}
-
-.microTopRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-bottom: var(--space-2);
-}
-
-.microCardTitle {
-  font-family: var(--font-body);
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.microStatus {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-accent);
-  background: var(--color-accent-light);
-  border-radius: 999px;
-  padding: 4px 10px;
-}
-
-.microDesc {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-  margin-bottom: var(--space-3);
-}
-
-.microTags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.microTag {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 12px;
-  background: var(--color-accent-light);
-  color: var(--color-accent);
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.microRightSide {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-shrink: 0;
-}
-
-.microUpdateBtn {
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 13px;
-  font-family: var(--font-body);
-  color: var(--color-accent);
-  cursor: pointer;
-}
-
-.microUpdateBtn:hover {
-  text-decoration: underline;
 }
 
 /* ── Amenity chips ── */
@@ -473,4 +360,152 @@
 
 .reviewTextarea:focus {
   border-color: var(--color-accent);
+}
+
+.directionsRow {
+  margin-bottom: var(--space-5);
+}
+
+.directionsBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+.directionsBtn:hover {
+  text-decoration: underline;
+}
+
+.savedMessage {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+  text-align: center;
+}
+
+.microSection {
+  margin-bottom: var(--space-5);
+}
+
+.microHeaderRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.microTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--color-text-primary);
+  line-height: 1.25;
+}
+
+.microBadge {
+  background: var(--color-accent-light);
+  color: var(--color-accent);
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.microCards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.microCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-card);
+}
+
+.microTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.microCardTitle {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.microStatus {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.microDesc {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-3);
+}
+
+.microTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.microTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  background: var(--color-accent-light);
+  color: var(--color-accent);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.microRightSide {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.microUpdateBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-family: var(--font-body);
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+.microUpdateBtn:hover {
+  text-decoration: underline;
+}
+
+.areaStatusGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
 }

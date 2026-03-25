@@ -56,10 +56,12 @@ export default function SpotDetailsPage() {
   const [busyness, setBusyness]         = useState(spot.busyness);
   const [showBusyness, setShowBusyness] = useState(false);
   const [showRate, setShowRate]         = useState(false);
-  const [bobstAreas, setBobstAreas] = useState(INITIAL_BOBST_AREAS);
-  const [showAreaUpdate, setShowAreaUpdate] = useState(false);
-  const [selectedAreaName, setSelectedAreaName] = useState('');
-  const [selectedAreaStatus, setSelectedAreaStatus] = useState(null);
+
+  const [showSavedOverlay, setShowSavedOverlay] = useState(false);
+const [bobstAreas, setBobstAreas] = useState(INITIAL_BOBST_AREAS);
+const [showAreaUpdate, setShowAreaUpdate] = useState(false);
+const [selectedAreaName, setSelectedAreaName] = useState('');
+const [selectedAreaStatus, setSelectedAreaStatus] = useState(null);
 
   // Busyness overlay state
   const [selectedLevel, setSelectedLevel] = useState(null);
@@ -87,7 +89,13 @@ export default function SpotDetailsPage() {
     setSelectedStar(0);
     setReviewText('');
   }
-  function openAreaUpdate(area) {
+function handleOpenMaps() {
+  const query = `${spot.name} ${spot.address}`;
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+  window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+}
+
+function openAreaUpdate(area) {
   setSelectedAreaName(area.name);
   setSelectedAreaStatus(area.current);
   setShowAreaUpdate(true);
@@ -108,6 +116,7 @@ function handleAreaUpdateSubmit() {
   setSelectedAreaName('');
   setSelectedAreaStatus(null);
 }
+
   
   /* ── Render ── */
   return (
@@ -133,10 +142,15 @@ function handleAreaUpdateSubmit() {
           <button
             className={`${styles.saveBtn} ${saved ? styles.saveBtnActive : ''}`}
             onClick={() => {
-              setSaved(v => !v);
+              if (!saved) {
+                setSaved(true);
+                setShowSavedOverlay(true);
+              } else {
+                setSaved(false);
+              }
               // TODO: call API to save/unsave
-            }}
-          >
+    }}
+  >
             <BookmarkIcon filled={saved} />
             {saved ? 'Saved' : 'Save'}
           </button>
@@ -144,9 +158,16 @@ function handleAreaUpdateSubmit() {
 
         {/* Location + hours preview */}
         <div className={styles.metaRow}>
-          <span className={styles.metaItem}><PinIcon /> {spot.address}</span>
-          <span className={styles.metaItem}><ClockIcon /> {spot.hours[0].time}</span>
-        </div>
+  <span className={styles.metaItem}><PinIcon /> {spot.address}</span>
+  <span className={styles.metaItem}><ClockIcon /> {spot.hours[0].time}</span>
+</div>
+
+
+<div className={styles.directionsRow}>
+  <button className={styles.directionsBtn} onClick={handleOpenMaps}>
+    <PinIcon /> Get Directions
+  </button>
+</div>
 
         {/* Rating row */}
         <div className={styles.ratingRow}>
@@ -231,7 +252,7 @@ function handleAreaUpdateSubmit() {
         How busy is {selectedAreaName} right now?
       </h2>
 
-      <div className={styles.levelGrid}>
+      <div className={styles.areaStatusGrid}>
         {['Quiet', 'Moderate', 'Busy'].map(status => (
           <button
             key={status}
@@ -286,6 +307,19 @@ function handleAreaUpdateSubmit() {
           </div>
         </div>
       </div>
+
+      {/* ── Saved confirmation overlay ── */}
+{showSavedOverlay && (
+  <div className={styles.overlay} onClick={() => setShowSavedOverlay(false)}>
+    <div className={styles.overlayCard} onClick={e => e.stopPropagation()}>
+      <h2 className={styles.overlayTitle}>Saved!</h2>
+      <p className={styles.savedMessage}>Added to Saved Spots</p>
+      <div className={styles.overlayActions}>
+        <Button onClick={() => setShowSavedOverlay(false)}>Done</Button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* ── Busyness overlay ── */}
       {showBusyness && (
