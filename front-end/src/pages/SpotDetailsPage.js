@@ -56,8 +56,8 @@ export default function SpotDetailsPage() {
   const [busyness, setBusyness]         = useState(spot.busyness);
   const [showBusyness, setShowBusyness] = useState(false);
   const [showRate, setShowRate]         = useState(false);
-
   const [showSavedOverlay, setShowSavedOverlay] = useState(false);
+
 const [bobstAreas, setBobstAreas] = useState(INITIAL_BOBST_AREAS);
 const [showAreaUpdate, setShowAreaUpdate] = useState(false);
 const [selectedAreaName, setSelectedAreaName] = useState('');
@@ -89,7 +89,8 @@ const [selectedAreaStatus, setSelectedAreaStatus] = useState(null);
     setSelectedStar(0);
     setReviewText('');
   }
-function handleOpenMaps() {
+
+  function handleOpenMaps() {
   const query = `${spot.name} ${spot.address}`;
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
   window.open(mapsUrl, '_blank', 'noopener,noreferrer');
@@ -299,11 +300,11 @@ function handleAreaUpdateSubmit() {
           <p className={styles.sectionLabel}>Hours</p>
           <div className={styles.hoursGrid}>
             {spot.hours.map(h => (
-              <>
-                <span key={h.day + '-day'} className={styles.hoursDay}>{h.day}</span>
-                <span key={h.day + '-time'} className={styles.hoursTime}>{h.time}</span>
-              </>
-            ))}
+  <div key={h.day} style={{ display: 'contents' }}>
+    <span className={styles.hoursDay}>{h.day}</span>
+    <span className={styles.hoursTime}>{h.time}</span>
+  </div>
+))}
           </div>
         </div>
       </div>
