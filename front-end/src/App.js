@@ -27,9 +27,10 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import ChoosePasswordPage from './pages/ChoosePasswordPage';
 import SpotDetailsPage from './pages/SpotDetailsPage';
 import SpotListPage from './pages/SpotListPage';
-// import SavedSpotsPage  from './pages/SavedSpotsPage';
 import AddSpotPage from './pages/AddSpotPage';
+import EditProfilePage from './pages/EditProfilePage';
 // import SettingsPage    from './pages/SettingsPage';
+// import SavedSpotsPage  from './pages/SavedSpotsPage';
 
 export default function App() {
   return (
@@ -47,8 +48,11 @@ export default function App() {
 
         {/* Profile page */}
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/edit" element={<EditProfilePage />} />
 
         <Route path="/spots" element={<SpotListPage />} />
+        
+        {/*Add Spot Page */}
         <Route path="/add-spot" element={<AddSpotPage />} />
 
 
