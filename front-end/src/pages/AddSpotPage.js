@@ -1,7 +1,8 @@
-import { useState} from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import BottomNav from '../components/BottomNav';
 import styles from './AddSpotPage.module.css';
 
 export default function AddSpotPage() {
@@ -23,7 +24,7 @@ export default function AddSpotPage() {
         setHours('');
         setDescription('');
         setImage(null);
-        navigate('/');  
+        navigate('/spots');
     };
 
     return (
@@ -91,9 +92,10 @@ export default function AddSpotPage() {
             
                 <p className={styles.footerText}>
                     Changed your mind?{' '}
-                    <Link to="/">Cancel</Link>
+                    <Link to="/spots">Cancel</Link>
                 </p>
           </div>
+          <BottomNav />
         </div>
     );
 }

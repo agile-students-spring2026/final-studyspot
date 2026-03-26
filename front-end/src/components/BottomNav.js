@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { path: '/spots',    label: 'Spots',   icon: SpotsIcon },
   { path: '/saved',    label: 'Saved',   icon: BookmarkIcon },
   { path: '/add-spot', label: 'Add',     icon: PlusIcon },
-  { path: '/settings', label: 'Profile', icon: ProfileIcon },
+  { path: '/profile', label: 'Profile', icon: ProfileIcon },
 ];
 
 export default function BottomNav() {
