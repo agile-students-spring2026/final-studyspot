@@ -29,6 +29,8 @@ import SpotDetailsPage from './pages/SpotDetailsPage';
 import SpotListPage from './pages/SpotListPage';
 import AddSpotPage from './pages/AddSpotPage';
 import EditProfilePage from './pages/EditProfilePage';
+import NotificationsPage from './pages/NotificationsPage';
+import AboutHelpPage from './pages/AboutHelpPage';
 // import SettingsPage    from './pages/SettingsPage';
 // import SavedSpotsPage  from './pages/SavedSpotsPage';
 
@@ -49,6 +51,8 @@ export default function App() {
         {/* Profile page */}
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/edit" element={<EditProfilePage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/about-help" element={<AboutHelpPage />} />
 
         <Route path="/spots" element={<SpotListPage />} />
         

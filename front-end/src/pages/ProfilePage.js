@@ -4,6 +4,11 @@ import BottomNav from '../components/BottomNav';
 import Button from '../components/Button';
 import styles from './ProfilePage.module.css';
 
+// Set unread notifications on first visit (mock — will come from back-end later)
+if (localStorage.getItem('hasUnreadNotifications') === null) {
+    localStorage.setItem('hasUnreadNotifications', 'true');
+}
+
 // Mock user data (will be added in backend sprint)
 const mockUser = {
     name: 'Name',
@@ -14,6 +19,9 @@ const mockUser = {
 export default function ProfilePage() {
     const navigate = useNavigate();
     const [showConfirm, setShowConfirm] = useState(false);
+    const [hasUnread, setHasUnread] = useState(
+        localStorage.getItem('hasUnreadNotifications') === 'true'
+    );
 
     function handleDeleteAccount() {
         // TODO: call delete API
@@ -45,8 +53,10 @@ export default function ProfilePage() {
         <nav className={styles.menu}>
             <Link to="/profile/edit" className={styles.menuItem}>Edit Profile</Link>
             <Link to="/saved" className={styles.menuItem}>Saved Spots</Link>
-            <span className={styles.menuItem}>Notifications</span>
-            <span className={styles.menuItem}>About / Help</span>
+            <Link to="/notifications" className={styles.menuItem}>
+                Notifications {hasUnread && <span className={styles.badge}>●</span>}
+            </Link>
+            <Link to="/about-help" className={styles.menuItem}>About / Help</Link>
             <button className={styles.menuItem} onClick={handleLogout}>Log Out</button>
             <button className={`${styles.menuItem} ${styles.danger}`} onClick={() => setShowConfirm(true)}>
               Delete Account

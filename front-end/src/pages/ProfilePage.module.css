@@ -103,6 +103,12 @@
     font-weight: 600;
 }
 
+.badge {
+    color: var(--color-accent);
+    font-size: 0.7rem;
+    margin-left: var(--space-2);
+}
+
 .danger {
     color: #d32f2f;
 }
