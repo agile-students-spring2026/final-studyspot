@@ -43,7 +43,7 @@ export default function ProfilePage() {
         </div>
 
         <nav className={styles.menu}>
-            <span className={styles.menuItem}>Edit Profile</span>
+            <Link to="/profile/edit" className={styles.menuItem}>Edit Profile</Link>
             <Link to="/saved" className={styles.menuItem}>Saved Spots</Link>
             <span className={styles.menuItem}>Notifications</span>
             <span className={styles.menuItem}>About / Help</span>
