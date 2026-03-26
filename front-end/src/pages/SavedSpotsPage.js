@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../components/Button';
+import BottomNav from '../components/BottomNav';
 import styles from './SavedSpotsPage.module.css';
 
 // Mock data (will be added in backend sprint)
@@ -59,12 +60,7 @@ return (
     </div>
 
     {/* Bottom Navigation */}
-    <nav className={styles.bottomNav}>
-    <Link to="/spots" className={styles.navItem}>Spots</Link>
-    <Link to="/saved" className={`${styles.navItem} ${styles.active}`}>Saved</Link>
-    <Link to="/add" className={styles.navItem}>Add</Link>
-    <Link to="/profile" className={styles.navItem}>Profile</Link>
-    </nav>
+    <BottomNav />
 
     {/* Remove Confirmation Overlay */}
     {showConfirm && (

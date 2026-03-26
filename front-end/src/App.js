@@ -49,7 +49,7 @@ export default function App() {
         <Route path="/profile" element={<ProfilePage />} />
 
         <Route path="/spots" element={<SpotListPage />} />
-        <Route path="/add-spot" element={<AddSpotPage />} /> */
+        <Route path="/add-spot" element={<AddSpotPage />} />
 
 
         {/* TODO: teammates — add your routes here */}
