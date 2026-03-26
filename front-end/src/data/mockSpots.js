@@ -14,6 +14,9 @@ export const MOCK_SPOTS = [
     reviewCount: 84,
     busyness: 65,
     busynessLabel: 'Moderate',
+    noiseLevel: 'Quiet',
+    hasOutlets: true,
+    hasWifi: true,
     description:
       'Bright, open floor with plenty of table seating and individual carrels. ' +
       'Great natural light from the atrium. Gets busy around midterms but the ' +
@@ -35,7 +38,10 @@ export const MOCK_SPOTS = [
     rating: 3.8,
     reviewCount: 42,
     busyness: 40,
-    busynessLabel: 'Light',
+    busynessLabel: 'Quiet',
+    noiseLevel: 'Moderate',
+    hasOutlets: true,
+    hasWifi: true,
     description:
       'Comfortable lounge seating with a quieter vibe. Good for group work or solo reading between classes.',
     amenities: ['Outlets', 'WiFi', 'Group Tables'],
@@ -53,7 +59,10 @@ export const MOCK_SPOTS = [
     rating: 4.6,
     reviewCount: 61,
     busyness: 80,
-    busynessLabel: 'Packed',
+    busynessLabel: 'Busy',
+    noiseLevel: 'Loud',
+    hasOutlets: true,
+    hasWifi: true,
     description:
       'Open workspace with 3D printers and whiteboards. Great for engineering projects, but it can get loud.',
     amenities: ['Outlets', 'Strong WiFi', 'Whiteboards', '3D Printers'],
@@ -72,7 +81,10 @@ export const MOCK_SPOTS = [
     rating: 3.5,
     reviewCount: 23,
     busyness: 20,
-    busynessLabel: 'Empty',
+    busynessLabel: 'Quiet',
+    noiseLevel: 'Quiet',
+    hasOutlets: true,
+    hasWifi: false,
     description:
       'Small, quiet study room in the residence hall basement. Often overlooked — a hidden gem during exams.',
     amenities: ['Outlets', 'WiFi', 'Quiet Zone'],
