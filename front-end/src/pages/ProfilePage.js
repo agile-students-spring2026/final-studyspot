@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
+import Button from '../components/Button';
 import styles from './ProfilePage.module.css';
 
 // Mock user data (will be added in backend sprint)
@@ -11,6 +13,15 @@ const mockUser = {
 
 export default function ProfilePage() {
     const navigate = useNavigate();
+    const [showConfirm, setShowConfirm] = useState(false);
+
+    function handleDeleteAccount() {
+        // TODO: call delete API
+        console.log('Account deleted');
+        setShowConfirm(false);
+        navigate('/login');
+    }
+
     function handleLogout() {
         // TODO: clear auth and redirect to login
         console.log('Logging out user...');
@@ -37,7 +48,24 @@ export default function ProfilePage() {
             <span className={styles.menuItem}>Notifications</span>
             <span className={styles.menuItem}>About / Help</span>
             <button className={styles.menuItem} onClick={handleLogout}>Log Out</button>
+            <button className={`${styles.menuItem} ${styles.danger}`} onClick={() => setShowConfirm(true)}>
+              Delete Account
+            </button>
         </nav>
+        
+        {showConfirm && (
+            <div className={styles.overlay}>
+              <div className={styles.modal}>
+                <p className={styles.modalText}>
+                  Are you sure you want to delete your account? This cannot be undone.
+                </p>
+                <Button onClick={handleDeleteAccount}>Confirm</Button>
+                <button className={styles.cancelBtn} onClick={() => setShowConfirm(false)}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+        )}
 
         <BottomNav />
         </div>
