@@ -51,7 +51,34 @@ To contribute to this project, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-## Building and Testing
+## How to Set Up and Run the Project
+
+### Prerequisites
+
+Make sure you have the following installed on your machine:
+
+- [Node.js](https://nodejs.org/) (v16 or higher recommended)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
+- [Git](https://git-scm.com/)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/agile-students-spring2026/final-studyspot.git
+cd final-studyspot
+```
+
+### 2. Set Up and Run the Front End
+
+```bash
+cd front-end
+npm install
+npm start
+```
+
+The app will open automatically at [http://localhost:3000](http://localhost:3000).
+
+### 3. Set Up and Run the Back End
 
 *TBD*
 
