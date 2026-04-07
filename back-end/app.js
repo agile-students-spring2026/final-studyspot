@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import path from 'path';
+import spotsRouter from './routes/spots.js';
 
 dotenv.config();
 
@@ -21,11 +22,8 @@ app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'StudySpot API' });
 });
 
-// TODO: teammates — import and wire your routers here, e.g.:
-// import authRouter from './routes/auth.js';
-// import spotsRouter from './routes/spots.js';
-// app.use('/api/auth', authRouter);
-// app.use('/api/studyspots', spotsRouter);
+app.use('/api/studyspots', spotsRouter);
+// TODO: wire additional routers here (e.g. authRouter)
 
 // ── File uploads ──────────────────────────────────────────────────────────────
 const storage = multer.diskStorage({
