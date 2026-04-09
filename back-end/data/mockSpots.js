@@ -103,3 +103,23 @@ export const MOCK_SPOTS = [
 
 export const FILTER_OPTIONS = ['Quiet', 'Outlets', 'Strong WiFi', 'Open Now', 'Group Tables'];
 export const BUSYNESS_LEVELS = ['Empty', 'Light', 'Moderate', 'Packed'];
+
+export function buildNewSpot({ spotName, address, hours, description }, filename) {
+  return {
+    id: String(Date.now()),
+    name: spotName,
+    building: spotName,
+    address,
+    rating: 0,
+    reviewCount: 0,
+    busyness: 0,
+    busynessLabel: 'Empty',
+    noiseLevel: 'Unknown',
+    hasOutlets: false,
+    hasWifi: false,
+    description,
+    amenities: [],
+    hours: [{ day: 'See listing', time: hours }],
+    imageUrl: filename ? `/static/uploads/${filename}` : '',
+  };
+}
