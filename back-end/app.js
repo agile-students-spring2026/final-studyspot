@@ -27,6 +27,21 @@ app.get('/', (req, res) => {
 // app.use('/api/auth', authRouter);
 // app.use('/api/studyspots', spotsRouter);
 
+import usersRouter from './routes/users.js';
+import savedRouter from './routes/saved.js';
+import { destroySession } from './utils/session.js';
+import authMiddleware from './middleware/auth.js';
+
+app.use('/api/users', usersRouter);
+app.use('/api/users', savedRouter);
+
+// POST /api/auth/signout — log out current user
+app.post('/api/auth/signout', authMiddleware, (req, res) => {
+  const token = req.headers['authorization'].split(' ')[1];
+  destroySession(token);
+  res.json({ message: 'Logged out.' });
+});
+
 // ── File uploads ──────────────────────────────────────────────────────────────
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
