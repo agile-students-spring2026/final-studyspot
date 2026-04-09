@@ -5,10 +5,11 @@ import dotenv from 'dotenv';
 import multer from 'multer';
 import path from 'path';
 import spotsRouter from './routes/spots.js';
-import { MOCK_SPOTS, buildNewSpot } from './data/mockSpots.js';
 import usersRouter from './routes/users.js';
 import savedRouter from './routes/saved.js';
+import authRouter from './routes/auth.js';
 import { destroySession } from './utils/session.js';
+import { MOCK_SPOTS, buildNewSpot } from './data/mockSpots.js';
 import authMiddleware from './middleware/auth.js';
 
 dotenv.config();
@@ -53,6 +54,7 @@ app.post('/api/studyspots', authMiddleware, upload.single('image'), (req, res) =
 
 app.use('/api/studyspots', spotsRouter);
 // TODO: wire additional routers here (e.g. authRouter)
+app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/users', savedRouter);
 
