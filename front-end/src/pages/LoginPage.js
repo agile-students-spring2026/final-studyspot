@@ -10,7 +10,7 @@ export default function LoginPage() {
   const [error, setError]       = useState('');
   const navigate                = useNavigate();
 
-  function handleSubmit(e) {
+  async function handleSubmit (e) {
     e.preventDefault();
     setError('');
 
@@ -23,8 +23,17 @@ export default function LoginPage() {
       return;
     }
 
-    // TODO: call auth API here
-    console.log('Login submitted', { email, password });
+    const res = await fetch('/api/auth/signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || 'Login failed.');
+      return;
+    }
+    localStorage.setItem('token', data.token);
     navigate('/spots');
   }
 
