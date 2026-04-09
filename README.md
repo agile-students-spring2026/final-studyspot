@@ -80,7 +80,26 @@ The app will open automatically at [http://localhost:3000](http://localhost:3000
 
 ### 3. Set Up and Run the Back End
 
-*TBD*
+In a second terminal:
+
+```bash
+cd back-end
+npm install
+npm start
+```
+
+Runs at [http://localhost:5000](http://localhost:5000). Re-run `npm install` after pulling if `package.json` changed.
+
+#### Tests
+
+```bash
+npm test          # mocha unit tests
+npm run coverage  # mocha + c8 coverage report
+```
+
+#### Environment variables
+
+Copy `back-end/.env.example` to `back-end/.env` and fill in values. Don't commit `.env`.
 
 ---
 
