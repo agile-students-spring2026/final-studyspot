@@ -5,40 +5,15 @@ import dotenv from 'dotenv';
 import multer from 'multer';
 import path from 'path';
 import spotsRouter from './routes/spots.js';
-
-dotenv.config();
-
-const app = express();
-
-app.use(express.json());
-app.use(morgan('dev'));
-app.use(cors());
-app.use(express.urlencoded({ extended: true }));
-app.use('/static', express.static('public'));
-
-// ── Routes ───────────────────────────────────────────────────────────────────
-// Health check
-app.get('/', (req, res) => {
-  res.json({ status: 'ok', message: 'StudySpot API' });
-});
-
-app.use('/api/studyspots', spotsRouter);
-// TODO: wire additional routers here (e.g. authRouter)
-
+import { MOCK_SPOTS, buildNewSpot } from './data/mockSpots.js';
 import usersRouter from './routes/users.js';
 import savedRouter from './routes/saved.js';
 import { destroySession } from './utils/session.js';
 import authMiddleware from './middleware/auth.js';
 
-app.use('/api/users', usersRouter);
-app.use('/api/users', savedRouter);
+dotenv.config();
 
-// POST /api/auth/signout — log out current user
-app.post('/api/auth/signout', authMiddleware, (req, res) => {
-  const token = req.headers['authorization'].split(' ')[1];
-  destroySession(token);
-  res.json({ message: 'Logged out.' });
-});
+const app = express();
 
 // ── File uploads ──────────────────────────────────────────────────────────────
 const storage = multer.diskStorage({
@@ -53,5 +28,39 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
+
+app.use(express.json());
+app.use(morgan('dev'));
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+app.use('/static', express.static('public'));
+
+// ── Routes ───────────────────────────────────────────────────────────────────
+// Health check
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'StudySpot API' });
+});
+
+app.post('/api/studyspots', authMiddleware, upload.single('image'), (req, res) => {
+  const { spotName, address, hours, description } = req.body;
+  if (!spotName || !address || !hours || !description) {
+    return res.status(400).json({ error: 'Missing required fields.' });
+  }
+  const newSpot = buildNewSpot(req.body, req.file?.filename);
+  MOCK_SPOTS.push(newSpot);
+  res.status(201).json(newSpot);
+});
+
+app.use('/api/studyspots', spotsRouter);
+// TODO: wire additional routers here (e.g. authRouter)
+app.use('/api/users', usersRouter);
+app.use('/api/users', savedRouter);
+
+// POST /api/auth/signout — log out current user
+app.post('/api/auth/signout', authMiddleware, (req, res) => {
+  const token = req.headers['authorization'].split(' ')[1];
+  destroySession(token);
+  res.json({ message: 'Logged out.' });
+});
 
 export default app;

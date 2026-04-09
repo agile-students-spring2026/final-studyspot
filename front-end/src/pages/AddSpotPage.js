@@ -13,18 +13,39 @@ export default function AddSpotPage() {
     const [image, setImage]             = useState(null);
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         
-        console.log('Submitted Spot Data:', { spotName, address, hours, description, image });
-        alert('Study spot added successfully!');
+        const formData = new FormData();
+        formData.append('spotName', spotName);
+        formData.append('address', address);
+        formData.append('hours', hours);
+        formData.append('description', description);
+        formData.append('image', image);
 
-        setSpotName('');
-        setAddress('');
-        setHours('');
-        setDescription('');
-        setImage(null);
-        navigate('/spots');
+        try {
+          const token = localStorage.getItem('token');
+          const headers = {};
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+          const res = await fetch('/api/studyspots', {
+            method: 'POST',
+            headers,
+            body: formData,
+          });
+          if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error || 'Failed to add spot.');
+          }
+
+          setSpotName('');
+          setAddress('');
+          setHours('');
+          setDescription('');
+          setImage(null);
+          navigate('/spots');
+        } catch (err) {
+          alert(err.message);
+        }
     };
 
     return (
