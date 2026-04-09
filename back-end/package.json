@@ -7,9 +7,9 @@
   "type": "module",
   "main": "app.js",
   "scripts": {
-    "test": "mocha --experimental-vm-modules test/*.test.js",
-    "coverage": "c8 mocha --experimental-vm-modules test/*.test.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "mocha 'test/**/*.test.js'",
+    "coverage": "c8 --all --include='**/*.js' --exclude='test/**' --exclude='coverage/**' --reporter=text --reporter=html mocha 'test/**/*.test.js'"
   },
   "dependencies": {
     "cors": "^2.8.6",
