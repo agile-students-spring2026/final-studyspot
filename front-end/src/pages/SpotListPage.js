@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import SearchBar from '../components/SearchBar';
 import FilterBottomSheet from '../components/FilterBottomSheet';
 import BottomNav from '../components/BottomNav';
 import Button from '../components/Button';
-import { MOCK_SPOTS } from '../data/mockSpots';
 import styles from './SpotListPage.module.css';
 
 const FILTER_OPTIONS = [
@@ -21,6 +20,26 @@ export default function SpotListPage() {
   const [activeFilters, setActiveFilters] = useState([]);
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState({ noiseLevel: '', outlets: '', wifi: '', busyness: '' });
+
+  const [spots, setSpots] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/studyspots')
+      .then(res => {
+        if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        setSpots(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
@@ -54,7 +73,7 @@ export default function SpotListPage() {
     }
   }
 
-  const filtered = MOCK_SPOTS.filter(spot => {
+  const filtered = spots.filter(spot => {
     const matchesSearch =
       spot.name.toLowerCase().includes(search.toLowerCase()) ||
       spot.building.toLowerCase().includes(search.toLowerCase());
@@ -121,10 +140,14 @@ export default function SpotListPage() {
       </div>
 
       <div className={styles.list}>
-        {filtered.length === 0 && (
+        {loading && <p className={styles.empty}>Loading study spots…</p>}
+        {error && !loading && (
+          <p className={styles.empty}>Could not load study spots: {error}</p>
+        )}
+        {!loading && !error && filtered.length === 0 && (
           <p className={styles.empty}>No spots match your search or filters.</p>
         )}
-        {filtered.map(spot => (
+        {!loading && !error && filtered.map(spot => (
           <div key={spot.id} className={styles.card}>
             <div className={styles.cardTop}>
               <h2 className={styles.cardTitle}>{spot.name}</h2>
