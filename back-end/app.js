@@ -47,7 +47,26 @@ app.post('/api/studyspots', authMiddleware, upload.single('image'), (req, res) =
   if (!spotName || !address || !hours || !description) {
     return res.status(400).json({ error: 'Missing required fields.' });
   }
-  const newSpot = buildNewSpot(req.body, req.file?.filename);
+
+  let parsedHours;
+  try {
+    parsedHours = JSON.parse(hours);
+  } catch {
+    return res.status(400).json({ error: 'Invalid hours format. Expected JSON.' });
+  }
+  if (!Array.isArray(parsedHours) || parsedHours.length === 0) {
+    return res.status(400).json({ error: 'Hours must be a non-empty array.' });
+  }
+  for (const entry of parsedHours) {
+    if (!entry.day || typeof entry.day !== 'string') {
+      return res.status(400).json({ error: 'Each hours entry must have a day.' });
+    }
+    if (typeof entry.time !== 'string') {
+      return res.status(400).json({ error: `Missing time for ${entry.day}.` });
+    }
+  }
+
+  const newSpot = buildNewSpot({ spotName, address, hours: parsedHours, description }, req.file?.filename);
   MOCK_SPOTS.push(newSpot);
   res.status(201).json(newSpot);
 });
