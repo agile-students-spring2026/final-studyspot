@@ -10,7 +10,7 @@ import styles from './SpotListPage.module.css';
 const FILTER_OPTIONS = [
   { key: 'quiet', label: 'Quiet' },
   { key: 'outlets', label: 'Has outlets' },
-  { key: 'groupFriendly', label: 'Group-friendly' },
+  { key: 'group', label: 'Group-friendly' },
 ];
 
 export default function SpotListPage() {
@@ -26,7 +26,7 @@ export default function SpotListPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:5050/api/studyspots', { cache: 'no-store' })
+    fetch('/api/studyspots')
       .then(res => {
         if (!res.ok) throw new Error(`Request failed: ${res.status}`);
         return res.json();
@@ -63,9 +63,8 @@ export default function SpotListPage() {
         return spot.amenities.includes('Quiet Zone') || spot.busyness <= 40;
       case 'outlets':
         return spot.amenities.includes('Outlets');
-      case 'groupFriendly':
+      case 'group':
         return (
-          spot.groupFriendly === true ||
           spot.amenities.includes('Group Tables') ||
           spot.amenities.includes('Whiteboards')
         );
