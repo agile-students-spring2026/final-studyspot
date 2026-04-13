@@ -20,7 +20,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import SavedSpotsPage from './pages/SavedSpotsPage';
 import ProfilePage from './pages/ProfilePage';
 
-// TODO: teammates — import your pages here as you build them, e.g.:
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
@@ -31,8 +30,6 @@ import AddSpotPage from './pages/AddSpotPage';
 import EditProfilePage from './pages/EditProfilePage';
 import NotificationsPage from './pages/NotificationsPage';
 import AboutHelpPage from './pages/AboutHelpPage';
-// import SettingsPage    from './pages/SettingsPage';
-// import SavedSpotsPage  from './pages/SavedSpotsPage';
 
 export default function App() {
   return (
@@ -59,11 +56,6 @@ export default function App() {
         {/*Add Spot Page */}
         <Route path="/add-spot" element={<AddSpotPage />} />
 
-
-        {/* TODO: teammates — add your routes here */}
-        {/* <Route path="/saved"         element={<SavedSpotsPage />} /> */}
-        
-        {/* <Route path="/settings"      element={<SettingsPage />} /> */}
 
         {/* Default: redirect to login */}
         <Route path="*" element={<Navigate to="/login" replace />} />
