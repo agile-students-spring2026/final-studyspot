@@ -1,5 +1,5 @@
 import express from 'express';
-import { findUserByEmail, validatePassword } from '../data/mockUsers.js';
+import { findUserByEmail, validatePassword, MOCK_USERS } from '../data/mockUsers.js';
 import { createSession } from '../utils/session.js';
 const router = express.Router();
 
@@ -20,4 +20,39 @@ router.post('/signin', (req, res) => {
   const token = createSession(user.id);
   res.json({ token, userId: user.id });
 });
+
+// POST /api/auth/signup — register a new user
+router.post('/signup', (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required.' });
+  }
+
+  if (!email.endsWith('.edu')) {
+    return res.status(400).json({ error: 'A valid university (.edu) email is required.' });
+  }
+
+  const existing = findUserByEmail(email);
+  if (existing) {
+    return res.status(409).json({ error: 'An account with this email already exists.' });
+  }
+
+  const newUser = {
+    id: String(MOCK_USERS.length + 1),
+    name: email.split('@')[0],
+    email,
+    password, // plain text for now — can be hashed with bcrypt if needed
+  };
+
+  MOCK_USERS.push(newUser);
+  const token = createSession(newUser.id);
+
+  return res.status(201).json({
+    message: 'Account created successfully.',
+    token,
+    user: { id: newUser.id, name: newUser.name, email: newUser.email },
+  });
+});
+
 export default router;

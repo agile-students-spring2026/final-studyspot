@@ -7,7 +7,7 @@ import styles from './AuthPages.module.css';
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const navigate          = useNavigate();
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -18,8 +18,6 @@ export default function SignUpPage() {
       return;
     }
 
-    // TODO: call API to send verification email, then navigate
-    console.log('Sending verification to', email);
     navigate('/verify-email', { state: { email } });
   }
 
