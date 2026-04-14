@@ -1,6 +1,6 @@
 import express from 'express';
 import { findUserByEmail, validatePassword, MOCK_USERS } from '../data/mockUsers.js';
-import { createSession } from '../utils/session.js';
+import { createSession, destroySession } from '../utils/session.js';
 const router = express.Router();
 
 // Exported for unit tests
@@ -53,6 +53,23 @@ router.post('/signup', (req, res) => {
     token,
     user: { id: newUser.id, name: newUser.name, email: newUser.email },
   });
+});
+
+// POST /api/auth/logout — log out and invalidate session
+router.post('/logout', (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided.' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  const removed = destroySession(token);
+
+  if (!removed) {
+    return res.status(401).json({ error: 'Invalid or already expired token.' });
+  }
+
+  return res.status(200).json({ message: 'Logged out successfully.' });
 });
 
 export default router;
