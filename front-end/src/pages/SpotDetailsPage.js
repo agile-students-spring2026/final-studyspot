@@ -47,78 +47,99 @@ const INITIAL_BOBST_AREAS = [
 ];
 
 export default function SpotDetailsPage() {
-  const navigate           = useNavigate();
-  const location           = useLocation();
-  const spot               = location.state?.spot ?? MOCK_SPOTS[0];
-  const isBobst = spot.name.toLowerCase().includes('bobst');
+  const navigate  = useNavigate();
+  const location  = useLocation();
+  const spot      = location.state?.spot ?? MOCK_SPOTS[0];
+  const isBobst   = spot.name.toLowerCase().includes('bobst');
 
-  const [saved, setSaved]               = useState(false);
-  const [busyness, setBusyness]         = useState(spot.busyness);
-  const [showBusyness, setShowBusyness] = useState(false);
-  const [showRate, setShowRate]         = useState(false);
-  const [showSavedOverlay, setShowSavedOverlay] = useState(false);
-
-const [bobstAreas, setBobstAreas] = useState(INITIAL_BOBST_AREAS);
-const [showAreaUpdate, setShowAreaUpdate] = useState(false);
-const [selectedAreaName, setSelectedAreaName] = useState('');
-const [selectedAreaStatus, setSelectedAreaStatus] = useState(null);
-
-  // Busyness overlay state
-  const [selectedLevel, setSelectedLevel] = useState(null);
-
-  // Rate overlay state
-  const [hoveredStar, setHoveredStar] = useState(0);
-  const [selectedStar, setSelectedStar] = useState(0);
-  const [reviewText, setReviewText]   = useState('');
+  const [saved, setSaved]                         = useState(false);
+  const [busyness, setBusyness]                   = useState(spot.busyness);
+  const [showBusyness, setShowBusyness]           = useState(false);
+  const [showRate, setShowRate]                   = useState(false);
+  const [showSavedOverlay, setShowSavedOverlay]   = useState(false);
+  const [bobstAreas, setBobstAreas]               = useState(INITIAL_BOBST_AREAS);
+  const [showAreaUpdate, setShowAreaUpdate]       = useState(false);
+  const [selectedAreaName, setSelectedAreaName]   = useState('');
+  const [selectedAreaStatus, setSelectedAreaStatus] = useState(null);
+  const [selectedLevel, setSelectedLevel]         = useState(null);
+  const [hoveredStar, setHoveredStar]             = useState(0);
+  const [selectedStar, setSelectedStar]           = useState(0);
+  const [reviewText, setReviewText]               = useState('');
+  const [displayRating, setDisplayRating]         = useState(spot.rating);
+  const [displayReviewCount, setDisplayReviewCount] = useState(spot.reviewCount);
 
   /* ── Helpers ── */
-  function handleBusynessSubmit() {
+  async function handleBusynessSubmit() {
     if (selectedLevel === null) return;
-    const newPct = [5, 35, 65, 95][selectedLevel];   // map label → %
+    const newPct   = [5, 35, 65, 95][selectedLevel];
+    const newLabel = BUSYNESS_LEVELS[selectedLevel];
+
+    try {
+      await fetch(`/api/studyspots/${spot.id}/busyness`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ busyness: newPct, busynessLabel: newLabel }),
+      });
+    } catch (err) {
+      console.warn('Could not update busyness on server:', err);
+    }
+
     setBusyness(newPct);
-    // TODO: call API to update busyness
     setShowBusyness(false);
     setSelectedLevel(null);
   }
 
-  function handleRateSubmit() {
+  async function handleRateSubmit() {
     if (!selectedStar) return;
-    // TODO: call API to submit review
-    console.log('Review submitted', { stars: selectedStar, text: reviewText });
+
+    try {
+      await fetch(`/api/studyspots/${spot.id}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: selectedStar, text: reviewText }),
+      });
+
+      // Refresh spot rating from backend
+      const updatedSpot = await fetch(`/api/studyspots/${spot.id}`).then(r => r.json());
+      if (updatedSpot.rating !== undefined) {
+        setDisplayRating(updatedSpot.rating);
+        setDisplayReviewCount(updatedSpot.reviewCount);
+      }
+    } catch (err) {
+      console.warn('Could not submit review:', err);
+    }
+
     setShowRate(false);
     setSelectedStar(0);
     setReviewText('');
   }
 
   function handleOpenMaps() {
-  const query = `${spot.name} ${spot.address}`;
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-  window.open(mapsUrl, '_blank', 'noopener,noreferrer');
-}
+    const query   = `${spot.name} ${spot.address}`;
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+    window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+  }
 
-function openAreaUpdate(area) {
-  setSelectedAreaName(area.name);
-  setSelectedAreaStatus(area.current);
-  setShowAreaUpdate(true);
-}
+  function openAreaUpdate(area) {
+    setSelectedAreaName(area.name);
+    setSelectedAreaStatus(area.current);
+    setShowAreaUpdate(true);
+  }
 
-function handleAreaUpdateSubmit() {
-  if (!selectedAreaStatus) return;
+  function handleAreaUpdateSubmit() {
+    if (!selectedAreaStatus) return;
+    setBobstAreas(prev =>
+      prev.map(area =>
+        area.name === selectedAreaName
+          ? { ...area, current: selectedAreaStatus }
+          : area
+      )
+    );
+    setShowAreaUpdate(false);
+    setSelectedAreaName('');
+    setSelectedAreaStatus(null);
+  }
 
-  setBobstAreas(prev =>
-    prev.map(area =>
-      area.name === selectedAreaName
-        ? { ...area, current: selectedAreaStatus }
-        : area
-    )
-  );
-
-  setShowAreaUpdate(false);
-  setSelectedAreaName('');
-  setSelectedAreaStatus(null);
-}
-
-  
   /* ── Render ── */
   return (
     <div className={styles.page}>
@@ -150,8 +171,8 @@ function handleAreaUpdateSubmit() {
                 setSaved(false);
               }
               // TODO: call API to save/unsave
-    }}
-  >
+            }}
+          >
             <BookmarkIcon filled={saved} />
             {saved ? 'Saved' : 'Save'}
           </button>
@@ -159,27 +180,26 @@ function handleAreaUpdateSubmit() {
 
         {/* Location + hours preview */}
         <div className={styles.metaRow}>
-  <span className={styles.metaItem}><PinIcon /> {spot.address}</span>
-  <span className={styles.metaItem}><ClockIcon /> {spot.hours[0].time}</span>
-</div>
+          <span className={styles.metaItem}><PinIcon /> {spot.address}</span>
+          <span className={styles.metaItem}><ClockIcon /> {spot.hours[0].time}</span>
+        </div>
 
-
-<div className={styles.directionsRow}>
-  <button className={styles.directionsBtn} onClick={handleOpenMaps}>
-    <PinIcon /> Get Directions
-  </button>
-</div>
+        <div className={styles.directionsRow}>
+          <button className={styles.directionsBtn} onClick={handleOpenMaps}>
+            <PinIcon /> Get Directions
+          </button>
+        </div>
 
         {/* Rating row */}
         <div className={styles.ratingRow}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <div className={styles.stars}>
               {[1,2,3,4,5].map(n => (
-                <StarIcon key={n} filled={n <= Math.round(spot.rating)} />
+                <StarIcon key={n} filled={n <= Math.round(displayRating)} />
               ))}
             </div>
             <span className={styles.ratingText}>
-              {spot.rating.toFixed(1)} · {spot.reviewCount} reviews
+              {displayRating.toFixed(1)} · {displayReviewCount} reviews
             </span>
           </div>
           <button className={styles.rateBtn} onClick={() => setShowRate(true)}>
@@ -206,78 +226,67 @@ function handleAreaUpdateSubmit() {
           </span>
         </div>
 
-      {isBobst && (
-  <div className={styles.microSection}>
-    <div className={styles.microHeaderRow}>
-      <div>
-        <p className={styles.sectionLabel}>Inside Bobst</p>
-        <h3 className={styles.microTitle}>Best areas based on how you want to study</h3>
-      </div>
-      <span className={styles.microBadge}>Pilot</span>
-    </div>
+        {isBobst && (
+          <div className={styles.microSection}>
+            <div className={styles.microHeaderRow}>
+              <div>
+                <p className={styles.sectionLabel}>Inside Bobst</p>
+                <h3 className={styles.microTitle}>Best areas based on how you want to study</h3>
+              </div>
+              <span className={styles.microBadge}>Pilot</span>
+            </div>
 
-    <div className={styles.microCards}>
-      {bobstAreas.map(area => (
-        <div key={area.name} className={styles.microCard}>
-          <div className={styles.microTopRow}>
-            <h4 className={styles.microCardTitle}>{area.name}</h4>
-
-            <div className={styles.microRightSide}>
-              <span className={styles.microStatus}>{area.current}</span>
-              <button
-                className={styles.microUpdateBtn}
-                onClick={() => openAreaUpdate(area)}
-              >
-                Update
-              </button>
+            <div className={styles.microCards}>
+              {bobstAreas.map(area => (
+                <div key={area.name} className={styles.microCard}>
+                  <div className={styles.microTopRow}>
+                    <h4 className={styles.microCardTitle}>{area.name}</h4>
+                    <div className={styles.microRightSide}>
+                      <span className={styles.microStatus}>{area.current}</span>
+                      <button
+                        className={styles.microUpdateBtn}
+                        onClick={() => openAreaUpdate(area)}
+                      >
+                        Update
+                      </button>
+                    </div>
+                  </div>
+                  <p className={styles.microDesc}>{area.description}</p>
+                  <div className={styles.microTags}>
+                    {area.tags.map(tag => (
+                      <span key={tag} className={styles.microTag}>{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
+        )}
 
-          <p className={styles.microDesc}>{area.description}</p>
-
-          <div className={styles.microTags}>
-            {area.tags.map(tag => (
-              <span key={tag} className={styles.microTag}>{tag}</span>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
-        
         {showAreaUpdate && (
-  <div className={styles.overlay} onClick={() => setShowAreaUpdate(false)}>
-    <div className={styles.overlayCard} onClick={e => e.stopPropagation()}>
-      <h2 className={styles.overlayTitle}>
-        How busy is {selectedAreaName} right now?
-      </h2>
-
-      <div className={styles.areaStatusGrid}>
-        {['Quiet', 'Moderate', 'Busy'].map(status => (
-          <button
-            key={status}
-            className={`${styles.levelBtn} ${
-              selectedAreaStatus === status ? styles.levelBtnActive : ''
-            }`}
-            onClick={() => setSelectedAreaStatus(status)}
-          >
-            {status}
-          </button>
-        ))}
-      </div>
-
-      <div className={styles.overlayActions}>
-        <Button variant="secondary" onClick={() => setShowAreaUpdate(false)}>
-          Cancel
-        </Button>
-        <Button disabled={!selectedAreaStatus} onClick={handleAreaUpdateSubmit}>
-          Submit
-        </Button>
-      </div>
-    </div>
-  </div>
-)}
+          <div className={styles.overlay} onClick={() => setShowAreaUpdate(false)}>
+            <div className={styles.overlayCard} onClick={e => e.stopPropagation()}>
+              <h2 className={styles.overlayTitle}>
+                How busy is {selectedAreaName} right now?
+              </h2>
+              <div className={styles.areaStatusGrid}>
+                {['Quiet', 'Moderate', 'Busy'].map(status => (
+                  <button
+                    key={status}
+                    className={`${styles.levelBtn} ${selectedAreaStatus === status ? styles.levelBtnActive : ''}`}
+                    onClick={() => setSelectedAreaStatus(status)}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+              <div className={styles.overlayActions}>
+                <Button variant="secondary" onClick={() => setShowAreaUpdate(false)}>Cancel</Button>
+                <Button disabled={!selectedAreaStatus} onClick={handleAreaUpdateSubmit}>Submit</Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Amenities */}
         <div style={{ marginBottom: 'var(--space-5)' }}>
@@ -300,27 +309,27 @@ function handleAreaUpdateSubmit() {
           <p className={styles.sectionLabel}>Hours</p>
           <div className={styles.hoursGrid}>
             {spot.hours.map(h => (
-  <div key={h.day} style={{ display: 'contents' }}>
-    <span className={styles.hoursDay}>{h.day}</span>
-    <span className={styles.hoursTime}>{h.time}</span>
-  </div>
-))}
+              <div key={h.day} style={{ display: 'contents' }}>
+                <span className={styles.hoursDay}>{h.day}</span>
+                <span className={styles.hoursTime}>{h.time}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* ── Saved confirmation overlay ── */}
-{showSavedOverlay && (
-  <div className={styles.overlay} onClick={() => setShowSavedOverlay(false)}>
-    <div className={styles.overlayCard} onClick={e => e.stopPropagation()}>
-      <h2 className={styles.overlayTitle}>Saved!</h2>
-      <p className={styles.savedMessage}>Added to Saved Spots</p>
-      <div className={styles.overlayActions}>
-        <Button onClick={() => setShowSavedOverlay(false)}>Done</Button>
-      </div>
-    </div>
-  </div>
-)}
+      {showSavedOverlay && (
+        <div className={styles.overlay} onClick={() => setShowSavedOverlay(false)}>
+          <div className={styles.overlayCard} onClick={e => e.stopPropagation()}>
+            <h2 className={styles.overlayTitle}>Saved!</h2>
+            <p className={styles.savedMessage}>Added to Saved Spots</p>
+            <div className={styles.overlayActions}>
+              <Button onClick={() => setShowSavedOverlay(false)}>Done</Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Busyness overlay ── */}
       {showBusyness && (
@@ -351,8 +360,6 @@ function handleAreaUpdateSubmit() {
         <div className={styles.overlay} onClick={() => setShowRate(false)}>
           <div className={styles.overlayCard} onClick={e => e.stopPropagation()}>
             <h2 className={styles.overlayTitle}>Rate this spot</h2>
-
-            {/* Star picker */}
             <div className={styles.starPicker}>
               {[1,2,3,4,5].map(n => (
                 <span
@@ -364,7 +371,6 @@ function handleAreaUpdateSubmit() {
                 >★</span>
               ))}
             </div>
-
             <textarea
               className={styles.reviewTextarea}
               placeholder="Share what you liked or didn't like (optional)"
@@ -372,7 +378,6 @@ function handleAreaUpdateSubmit() {
               onChange={e => setReviewText(e.target.value)}
               maxLength={500}
             />
-
             <div className={styles.overlayActions}>
               <Button variant="secondary" onClick={() => setShowRate(false)}>Cancel</Button>
               <Button disabled={!selectedStar} onClick={handleRateSubmit}>Submit</Button>

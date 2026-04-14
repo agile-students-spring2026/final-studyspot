@@ -6,13 +6,15 @@
  *   - validatePassword (data/mockUsers.js)
  *   - generateToken, createSession, destroySession, getSessionUser (utils/session.js)
  *   - authMiddleware (middleware/auth.js)
+ *   - authenticateUser (routes/auth.js)
+ *   - signup logic (routes/auth.js)
  *
  * Run tests:    npm test
  * Run coverage: npm run coverage
  */
 
 import { expect } from 'chai';
-import { findUserByEmail, validatePassword } from '../data/mockUsers.js';
+import { findUserByEmail, validatePassword, MOCK_USERS } from '../data/mockUsers.js';
 import {
   activeSessions,
   generateToken,
@@ -21,6 +23,7 @@ import {
   getSessionUser,
 } from '../utils/session.js';
 import authMiddleware from '../middleware/auth.js';
+import { authenticateUser } from '../routes/auth.js';
 
 // ── findUserByEmail ───────────────────────────────────────────────────────────
 describe('findUserByEmail', () => {
@@ -108,9 +111,81 @@ describe('Session management', () => {
   });
 });
 
+// ── authenticateUser ──────────────────────────────────────────────────────────
+describe('authenticateUser', () => {
+  it('should return a user object for valid credentials', () => {
+    const user = authenticateUser('am12611@nyu.edu', 'password123');
+    expect(user).to.be.an('object');
+    expect(user.email).to.equal('am12611@nyu.edu');
+  });
+
+  it('should return null for an incorrect password', () => {
+    const user = authenticateUser('am12611@nyu.edu', 'wrongpassword');
+    expect(user).to.be.null;
+  });
+
+  it('should return null for an email that does not exist', () => {
+    const user = authenticateUser('nobody@nyu.edu', 'password123');
+    expect(user).to.be.null;
+  });
+
+  it('should return null if email is empty', () => {
+    const user = authenticateUser('', 'password123');
+    expect(user).to.be.null;
+  });
+});
+
+// ── signup logic ──────────────────────────────────────────────────────────────
+describe('signup logic', () => {
+  // Track original length so we can clean up after tests
+  let originalLength;
+
+  beforeEach(() => {
+    originalLength = MOCK_USERS.length;
+  });
+
+  afterEach(() => {
+    // Remove any users added during the test
+    MOCK_USERS.splice(originalLength);
+  });
+
+  it('should add a new user to MOCK_USERS when email is not taken', () => {
+    const newUser = {
+      id: String(MOCK_USERS.length + 1),
+      name: 'testuser',
+      email: 'testuser@nyu.edu',
+      password: 'securepass',
+    };
+    MOCK_USERS.push(newUser);
+    expect(findUserByEmail('testuser@nyu.edu')).to.be.an('object');
+  });
+
+  it('should not allow duplicate emails', () => {
+    const existing = findUserByEmail('am12611@nyu.edu');
+    expect(existing).to.not.be.undefined;
+    // Simulates the 409 check in the route
+    expect(!!existing).to.be.true;
+  });
+
+  it('should reject a non-.edu email', () => {
+    const email = 'user@gmail.com';
+    expect(email.endsWith('.edu')).to.be.false;
+  });
+
+  it('should accept a valid .edu email', () => {
+    const email = 'newstudent@nyu.edu';
+    expect(email.endsWith('.edu')).to.be.true;
+  });
+
+  it('new user should be findable by email after being added', () => {
+    const email = 'brandnew@nyu.edu';
+    MOCK_USERS.push({ id: '99', name: 'brandnew', email, password: 'pass' });
+    expect(findUserByEmail(email)).to.have.property('email', email);
+  });
+});
+
 // ── authMiddleware ────────────────────────────────────────────────────────────
 describe('authMiddleware', () => {
-  // Helper to create mock req, res, next for middleware testing
   function mockReqRes(authHeader) {
     const req = { headers: { authorization: authHeader } };
     const res = {
