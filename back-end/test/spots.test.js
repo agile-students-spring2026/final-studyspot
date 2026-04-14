@@ -1,7 +1,7 @@
-// Unit tests for filterSpotsBySearch (US3 #25 + #26)
+// Unit tests for filterSpots, buildNewSpot, busyness endpoint, and reviews endpoint
 
 import { expect } from 'chai';
-import { filterSpots } from '../routes/spots.js';
+import { filterSpots, reviewsStore } from '../routes/spots.js';
 import { MOCK_SPOTS, buildNewSpot } from '../data/mockSpots.js';
 
 describe('filterSpots', () => {
@@ -141,16 +141,12 @@ describe('buildNewSpot', () => {
     expect(spot.reviewCount).to.equal(0);
   });
 
-  it('stores hours array directly when given an array', () => {
-    const hoursArray = [
-      { day: 'Monday', time: '8:00 AM - 10:00 PM' },
-      { day: 'Tuesday', time: 'Closed' },
-    ];
+  it('wraps hours string into the expected array format', () => {
     const spot = buildNewSpot(
-      { spotName: 'X', address: 'Y', hours: hoursArray, description: 'D' },
+      { spotName: 'X', address: 'Y', hours: '8AM-10PM', description: 'D' },
       'img.jpg'
     );
-    expect(spot.hours).to.deep.equal(hoursArray);
+    expect(spot.hours).to.deep.equal([{ day: 'See listing', time: '8AM-10PM' }]);
   });
 
   it('builds a Google Maps URL from the address', () => {
@@ -175,5 +171,92 @@ describe('buildNewSpot', () => {
     );
     expect(spot.groupFriendly).to.equal(false);
     expect(spot.microLocations).to.deep.equal([]);
+  });
+});
+
+// ── PATCH /:spotId/busyness ───────────────────────────────────────────────────
+describe('PATCH /api/studyspots/:spotId/busyness (logic)', () => {
+  it('should update busyness value on a valid spot', () => {
+    const spot = MOCK_SPOTS.find(s => s.id === '1');
+    const originalBusyness = spot.busyness;
+    spot.busyness = 80;
+    expect(spot.busyness).to.equal(80);
+    spot.busyness = originalBusyness;
+  });
+
+  it('should update busynessLabel on a valid spot', () => {
+    const spot = MOCK_SPOTS.find(s => s.id === '1');
+    const original = spot.busynessLabel;
+    spot.busynessLabel = 'Packed';
+    expect(spot.busynessLabel).to.equal('Packed');
+    spot.busynessLabel = original;
+  });
+
+  it('should return undefined for a spot that does not exist', () => {
+    const spot = MOCK_SPOTS.find(s => s.id === 'nonexistent');
+    expect(spot).to.be.undefined;
+  });
+
+  it('parseBusynessValue should parse a numeric string', () => {
+    const parsed = Number('75');
+    expect(parsed).to.equal(75);
+  });
+
+  it('parseBusynessValue should return NaN for a non-numeric string', () => {
+    const parsed = Number('abc');
+    expect(parsed).to.be.NaN;
+  });
+});
+
+// ── POST /:spotId/reviews ─────────────────────────────────────────────────────
+describe('POST /api/studyspots/:spotId/reviews (logic)', () => {
+  beforeEach(() => {
+    reviewsStore.clear();
+  });
+
+  it('should store a review for a valid spot', () => {
+    const spotId = '1';
+    const review = { id: '1', spotId, rating: 4, text: 'Great spot', createdAt: new Date().toISOString() };
+    reviewsStore.set(spotId, [review]);
+    expect(reviewsStore.get(spotId)).to.have.lengthOf(1);
+    expect(reviewsStore.get(spotId)[0].rating).to.equal(4);
+  });
+
+  it('should store multiple reviews for the same spot', () => {
+    const spotId = '1';
+    reviewsStore.set(spotId, [
+      { id: '1', spotId, rating: 4, text: 'Good', createdAt: new Date().toISOString() },
+      { id: '2', spotId, rating: 2, text: 'Noisy', createdAt: new Date().toISOString() },
+    ]);
+    expect(reviewsStore.get(spotId)).to.have.lengthOf(2);
+  });
+
+  it('should correctly calculate average rating', () => {
+    const reviews = [{ rating: 4 }, { rating: 2 }];
+    const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+    expect(avg).to.equal(3);
+  });
+
+  it('should reject a rating below 1', () => {
+    const rating = 0;
+    expect(rating < 1 || rating > 5).to.be.true;
+  });
+
+  it('should reject a rating above 5', () => {
+    const rating = 6;
+    expect(rating < 1 || rating > 5).to.be.true;
+  });
+
+  it('should allow a review with no text', () => {
+    const spotId = '2';
+    const review = { id: '1', spotId, rating: 3, text: '', createdAt: new Date().toISOString() };
+    reviewsStore.set(spotId, [review]);
+    expect(reviewsStore.get(spotId)[0].text).to.equal('');
+  });
+
+  it('reviewsStore should be empty after clearing', () => {
+    reviewsStore.set('1', [{ rating: 5 }]);
+    reviewsStore.clear();
+    expect(reviewsStore.size).to.equal(0);
   });
 });

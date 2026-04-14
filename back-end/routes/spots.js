@@ -5,6 +5,9 @@ import { MOCK_SPOTS } from '../data/mockSpots.js';
 
 const router = express.Router();
 
+// In-memory reviews store: spotId → array of reviews
+const reviewsStore = new Map();
+
 function matchesQuietFilter(spot) {
   return (
     spot.noiseLevel?.toLowerCase() === 'quiet' ||
@@ -23,14 +26,12 @@ function parseBusynessValue(value) {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value;
   }
-
   if (typeof value === 'string' && value.trim() !== '') {
     const parsed = Number(value);
     if (Number.isFinite(parsed)) {
       return parsed;
     }
   }
-
   return null;
 }
 
@@ -65,12 +66,76 @@ router.get('/', (req, res) => {
 // GET /api/studyspots/:spotId
 router.get('/:spotId', (req, res) => {
   const spot = MOCK_SPOTS.find(s => s.id === req.params.spotId);
+  if (!spot) {
+    return res.status(404).json({ error: 'Spot not found.' });
+  }
+  res.json(spot);
+});
 
+// PATCH /api/studyspots/:spotId/busyness — update overall spot busyness
+router.patch('/:spotId/busyness', (req, res) => {
+  const { spotId } = req.params;
+  const { busyness, busynessLabel } = req.body;
+
+  const spot = MOCK_SPOTS.find(s => s.id === spotId);
   if (!spot) {
     return res.status(404).json({ error: 'Spot not found.' });
   }
 
-  res.json(spot);
+  const parsedBusyness = parseBusynessValue(busyness);
+
+  if (parsedBusyness === null && !busynessLabel) {
+    return res.status(400).json({ error: 'Provide a valid busyness value or busynessLabel.' });
+  }
+
+  if (parsedBusyness !== null) {
+    spot.busyness = parsedBusyness;
+  }
+
+  if (busynessLabel) {
+    spot.busynessLabel = busynessLabel;
+  }
+
+  res.json({
+    message: 'Busyness updated.',
+    spot: { id: spot.id, busyness: spot.busyness, busynessLabel: spot.busynessLabel },
+  });
+});
+
+// POST /api/studyspots/:spotId/reviews — submit a rating and optional review
+router.post('/:spotId/reviews', (req, res) => {
+  const { spotId } = req.params;
+  const { rating, text } = req.body;
+
+  const spot = MOCK_SPOTS.find(s => s.id === spotId);
+  if (!spot) {
+    return res.status(404).json({ error: 'Spot not found.' });
+  }
+
+  if (!rating || typeof rating !== 'number' || rating < 1 || rating > 5) {
+    return res.status(400).json({ error: 'Rating must be a number between 1 and 5.' });
+  }
+
+  const review = {
+    id: Date.now().toString(),
+    spotId,
+    rating,
+    text: text || '',
+    createdAt: new Date().toISOString(),
+  };
+
+  if (!reviewsStore.has(spotId)) {
+    reviewsStore.set(spotId, []);
+  }
+  reviewsStore.get(spotId).push(review);
+
+  // Recalculate spot rating average
+  const allReviews = reviewsStore.get(spotId);
+  const avg = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+  spot.rating = Math.round(avg * 10) / 10;
+  spot.reviewCount = allReviews.length;
+
+  res.status(201).json({ message: 'Review submitted.', review });
 });
 
 // PATCH /api/studyspots/:spotId/micro-locations/:microLocationId/busyness
@@ -113,4 +178,5 @@ router.patch('/:spotId/micro-locations/:microLocationId/busyness', (req, res) =>
   });
 });
 
+export { reviewsStore };
 export default router;
