@@ -31,10 +31,10 @@ export const MOCK_SPOTS = [
       'upper mezzanine usually has open spots.',
     amenities: ['Outlets', 'Strong WiFi', 'Quiet Zone', 'Accessible'],
     hours: [
-      { day: 'Mon – Thu', time: '8:00 AM – 2:00 AM' },
-      { day: 'Friday',    time: '8:00 AM – 10:00 PM' },
-      { day: 'Saturday',  time: '10:00 AM – 10:00 PM' },
-      { day: 'Sunday',    time: '10:00 AM – 2:00 AM' },
+      { day: 'Mon - Thu', time: '8:00 AM - 2:00 AM' },
+      { day: 'Friday',    time: '8:00 AM - 10:00 PM' },
+      { day: 'Saturday',  time: '10:00 AM - 10:00 PM' },
+      { day: 'Sunday',    time: '10:00 AM - 2:00 AM' },
     ],
     imageUrl: 'https://picsum.photos/seed/spot1/600/300',
     microLocations: [
@@ -82,8 +82,8 @@ export const MOCK_SPOTS = [
       'Comfortable lounge seating with a quieter vibe. Good for group work or solo reading between classes.',
     amenities: ['Outlets', 'WiFi', 'Group Tables'],
     hours: [
-      { day: 'Mon – Fri', time: '7:00 AM – 11:00 PM' },
-      { day: 'Sat – Sun', time: '9:00 AM – 9:00 PM' },
+      { day: 'Mon - Fri', time: '7:00 AM - 11:00 PM' },
+      { day: 'Sat - Sun', time: '8:00 AM - 10:00 PM' },
     ],
     imageUrl: 'https://picsum.photos/seed/spot2/600/300',
     microLocations: [
@@ -123,8 +123,8 @@ export const MOCK_SPOTS = [
       'Open workspace with 3D printers and whiteboards. Great for engineering projects, but it can get loud.',
     amenities: ['Outlets', 'Strong WiFi', 'Whiteboards', '3D Printers'],
     hours: [
-      { day: 'Mon – Fri', time: '9:00 AM – 10:00 PM' },
-      { day: 'Saturday',  time: '10:00 AM – 6:00 PM' },
+      { day: 'Mon - Fri', time: '9:00 AM - 10:00 PM' },
+      { day: 'Saturday',  time: '10:00 AM - 6:00 PM' },
       { day: 'Sunday',    time: 'Closed' },
     ],
     imageUrl: 'https://picsum.photos/seed/spot3/600/300',
@@ -147,7 +147,7 @@ export const MOCK_SPOTS = [
       'Small, quiet study room in the residence hall basement. Often overlooked — a hidden gem during exams.',
     amenities: ['Outlets', 'WiFi', 'Quiet Zone'],
     hours: [
-      { day: 'Mon – Sun', time: '24 Hours' },
+      { day: 'Mon - Sun', time: '24 Hours' },
     ],
     imageUrl: 'https://picsum.photos/seed/spot4/600/300',
   },
@@ -173,7 +173,7 @@ export function buildNewSpot({ spotName, address, hours, description }, filename
     groupFriendly: false,
     description,
     amenities: [],
-    hours: [{ day: 'See listing', time: hours }],
+    hours: Array.isArray(hours) ? hours : [{ day: 'See listing', time: hours }],
     imageUrl: filename ? `/static/uploads/${filename}` : '',
     microLocations: [],
   };

@@ -12,9 +12,13 @@
     "coverage": "c8 --all --include='**/*.js' --exclude='test/**' --exclude='coverage/**' --reporter=text --reporter=html mocha 'test/**/*.test.js'"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.0",
     "express": "^5.2.1",
+    "express-validator": "^7.3.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.5.0",
     "morgan": "^1.10.1",
     "multer": "^2.1.1"
   },

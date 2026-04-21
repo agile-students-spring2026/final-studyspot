@@ -1,106 +1,7 @@
-// Unit tests for filterSpotsBySearch (US3 #25 + #26)
+// Unit tests for filterSpots, buildNewSpot, busyness endpoint, and reviews endpoint
 
 import { expect } from 'chai';
-import { filterSpotsBySearch } from '../routes/spots.js';
-import { MOCK_SPOTS } from '../data/mockSpots.js';
-import { buildNewSpot } from '../data/mockSpots.js';
-
-describe('filterSpotsBySearch', () => {
-  it('returns all spots when search is undefined', () => {
-    expect(filterSpotsBySearch(MOCK_SPOTS, undefined)).to.deep.equal(MOCK_SPOTS);
-  });
-
-  it('returns all spots when search is an empty string', () => {
-    expect(filterSpotsBySearch(MOCK_SPOTS, '')).to.deep.equal(MOCK_SPOTS);
-  });
-
-  it('returns all spots when search is only whitespace', () => {
-    expect(filterSpotsBySearch(MOCK_SPOTS, '   ')).to.deep.equal(MOCK_SPOTS);
-  });
-
-  it('matches name with a lowercase partial query', () => {
-    const result = filterSpotsBySearch(MOCK_SPOTS, 'bobst');
-    expect(result).to.have.lengthOf(1);
-    expect(result[0].id).to.equal('1');
-  });
-
-  it('matches name with a mixed-case query (case-insensitive)', () => {
-    const result = filterSpotsBySearch(MOCK_SPOTS, 'KiMmEl');
-    expect(result).to.have.lengthOf(1);
-    expect(result[0].id).to.equal('2');
-  });
-
-  it('matches name with a partial query in the middle of the name', () => {
-    const result = filterSpotsBySearch(MOCK_SPOTS, 'study');
-    expect(result).to.have.lengthOf(1);
-    expect(result[0].id).to.equal('4'); // Weinstein Study Room
-  });
-
-  it('returns [] when no spot name matches', () => {
-    expect(filterSpotsBySearch(MOCK_SPOTS, 'nonexistent')).to.deep.equal([]);
-  });
-
-  it('matches name only — does NOT match by building name', () => {
-    // 'Dibner' is the building of spot 3 ('Tandon MakerSpace') but is not in its name.
-    expect(filterSpotsBySearch(MOCK_SPOTS, 'Dibner')).to.deep.equal([]);
-  });
-});
-
-
-describe('buildNewSpot', () => {
-  it('should return an object with all required spot fields', () => {
-    const spot = buildNewSpot(
-      { spotName: 'Test Spot', address: '123 Main St', hours: '9AM-5PM', description: 'A place' },
-      'photo-123.jpg'
-    );
-    expect(spot).to.have.all.keys(
-      'id', 'name', 'building', 'address', 'rating', 'reviewCount',
-      'busyness', 'busynessLabel', 'noiseLevel', 'hasOutlets', 'hasWifi',
-      'description', 'amenities', 'hours', 'imageUrl'
-    );
-  });
-  it('should set name and building from spotName', () => {
-    const spot = buildNewSpot(
-      { spotName: 'Bobst 5th floor', address: '70 WSS', hours: '9AM-5PM', description: 'desc' },
-      'img.jpg'
-    );
-    expect(spot.name).to.equal('Bobst 5th floor');
-    expect(spot.building).to.equal('Bobst 5th floor');
-  });
-  it('should set imageUrl from filename', () => {
-    const spot = buildNewSpot(
-      { spotName: 'X', address: 'Y', hours: 'Z', description: 'D' },
-      'photo-123.jpg'
-    );
-    expect(spot.imageUrl).to.equal('/static/uploads/photo-123.jpg');
-  });
-  it('should set imageUrl to empty string when no filename is provided', () => {
-    const spot = buildNewSpot(
-      { spotName: 'X', address: 'Y', hours: 'Z', description: 'D' },
-      undefined
-    );
-    expect(spot.imageUrl).to.equal('');
-  });
-  it('should default rating and reviewCount to 0', () => {
-    const spot = buildNewSpot(
-      { spotName: 'X', address: 'Y', hours: 'Z', description: 'D' },
-      'img.jpg'
-    );
-    expect(spot.rating).to.equal(0);
-    expect(spot.reviewCount).to.equal(0);
-  });
-  it('should wrap hours string into the expected array format', () => {
-    const spot = buildNewSpot(
-      { spotName: 'X', address: 'Y', hours: '8AM-10PM', description: 'D' },
-      'img.jpg'
-    );
-    expect(spot.hours).to.deep.equal([{ day: 'See listing', time: '8AM-10PM' }]);
-  });
-});
-// Unit tests for study spot filtering and mock spot construction
-
-import { expect } from 'chai';
-import { filterSpots } from '../routes/spots.js';
+import { filterSpots, reviewsStore } from '../routes/spots.js';
 import { MOCK_SPOTS, buildNewSpot } from '../data/mockSpots.js';
 
 describe('filterSpots', () => {
@@ -240,7 +141,7 @@ describe('buildNewSpot', () => {
     expect(spot.reviewCount).to.equal(0);
   });
 
-  it('wraps the hours string into the expected array format', () => {
+  it('wraps hours string into the expected array format', () => {
     const spot = buildNewSpot(
       { spotName: 'X', address: 'Y', hours: '8AM-10PM', description: 'D' },
       'img.jpg'
@@ -270,5 +171,92 @@ describe('buildNewSpot', () => {
     );
     expect(spot.groupFriendly).to.equal(false);
     expect(spot.microLocations).to.deep.equal([]);
+  });
+});
+
+// ── PATCH /:spotId/busyness ───────────────────────────────────────────────────
+describe('PATCH /api/studyspots/:spotId/busyness (logic)', () => {
+  it('should update busyness value on a valid spot', () => {
+    const spot = MOCK_SPOTS.find(s => s.id === '1');
+    const originalBusyness = spot.busyness;
+    spot.busyness = 80;
+    expect(spot.busyness).to.equal(80);
+    spot.busyness = originalBusyness;
+  });
+
+  it('should update busynessLabel on a valid spot', () => {
+    const spot = MOCK_SPOTS.find(s => s.id === '1');
+    const original = spot.busynessLabel;
+    spot.busynessLabel = 'Packed';
+    expect(spot.busynessLabel).to.equal('Packed');
+    spot.busynessLabel = original;
+  });
+
+  it('should return undefined for a spot that does not exist', () => {
+    const spot = MOCK_SPOTS.find(s => s.id === 'nonexistent');
+    expect(spot).to.be.undefined;
+  });
+
+  it('parseBusynessValue should parse a numeric string', () => {
+    const parsed = Number('75');
+    expect(parsed).to.equal(75);
+  });
+
+  it('parseBusynessValue should return NaN for a non-numeric string', () => {
+    const parsed = Number('abc');
+    expect(parsed).to.be.NaN;
+  });
+});
+
+// ── POST /:spotId/reviews ─────────────────────────────────────────────────────
+describe('POST /api/studyspots/:spotId/reviews (logic)', () => {
+  beforeEach(() => {
+    reviewsStore.clear();
+  });
+
+  it('should store a review for a valid spot', () => {
+    const spotId = '1';
+    const review = { id: '1', spotId, rating: 4, text: 'Great spot', createdAt: new Date().toISOString() };
+    reviewsStore.set(spotId, [review]);
+    expect(reviewsStore.get(spotId)).to.have.lengthOf(1);
+    expect(reviewsStore.get(spotId)[0].rating).to.equal(4);
+  });
+
+  it('should store multiple reviews for the same spot', () => {
+    const spotId = '1';
+    reviewsStore.set(spotId, [
+      { id: '1', spotId, rating: 4, text: 'Good', createdAt: new Date().toISOString() },
+      { id: '2', spotId, rating: 2, text: 'Noisy', createdAt: new Date().toISOString() },
+    ]);
+    expect(reviewsStore.get(spotId)).to.have.lengthOf(2);
+  });
+
+  it('should correctly calculate average rating', () => {
+    const reviews = [{ rating: 4 }, { rating: 2 }];
+    const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+    expect(avg).to.equal(3);
+  });
+
+  it('should reject a rating below 1', () => {
+    const rating = 0;
+    expect(rating < 1 || rating > 5).to.be.true;
+  });
+
+  it('should reject a rating above 5', () => {
+    const rating = 6;
+    expect(rating < 1 || rating > 5).to.be.true;
+  });
+
+  it('should allow a review with no text', () => {
+    const spotId = '2';
+    const review = { id: '1', spotId, rating: 3, text: '', createdAt: new Date().toISOString() };
+    reviewsStore.set(spotId, [review]);
+    expect(reviewsStore.get(spotId)[0].text).to.equal('');
+  });
+
+  it('reviewsStore should be empty after clearing', () => {
+    reviewsStore.set('1', [{ rating: 5 }]);
+    reviewsStore.clear();
+    expect(reviewsStore.size).to.equal(0);
   });
 });

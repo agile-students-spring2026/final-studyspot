@@ -26,7 +26,7 @@ export default function SpotListPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:5050/api/studyspots', { cache: 'no-store' })
+    fetch('/api/studyspots', { cache: 'no-store' })
       .then(res => {
         if (!res.ok) throw new Error(`Request failed: ${res.status}`);
         return res.json();

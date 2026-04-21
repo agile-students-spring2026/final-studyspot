@@ -8,6 +8,7 @@ export default function ChoosePasswordPage() {
   const [password, setPassword]   = useState('');
   const [confirm, setConfirm]     = useState('');
   const [error, setError]         = useState('');
+  const [loading, setLoading]     = useState(false);
   const navigate                  = useNavigate();
   const location                  = useLocation();
   const email                     = location.state?.email ?? '';
@@ -21,11 +22,11 @@ export default function ChoosePasswordPage() {
     return score;
   }
 
-  const score       = strengthScore(password);
+  const score         = strengthScore(password);
   const strengthLabel = ['', 'Weak', 'Fair', 'Strong'][score];
   const strengthColor = ['', '#C0392B', '#E8A838', '#3D6B4F'][score];
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError('');
 
@@ -38,9 +39,29 @@ export default function ChoosePasswordPage() {
       return;
     }
 
-    // TODO: call API to set password and complete registration
-    console.log('Account created for', email);
-    navigate('/spots');   // Navigate to main app (Spot List)
+    // POST to backend to create the account
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Signup failed.');
+        return;
+      }
+
+      // Store token and navigate to main app
+      localStorage.setItem('token', data.token);
+      navigate('/spots');
+    } catch (err) {
+      setError('Could not connect to server. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -92,7 +113,9 @@ export default function ChoosePasswordPage() {
 
           {error && <p className={styles.formError}>{error}</p>}
 
-          <Button type="submit">Sign Up</Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? 'Creating account...' : 'Sign Up'}
+          </Button>
         </form>
       </div>
     </div>
