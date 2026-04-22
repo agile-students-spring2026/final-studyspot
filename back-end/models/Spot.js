@@ -130,4 +130,4 @@ const spotSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model('Spot', spotSchema);
+export default mongoose.models.Spot || mongoose.model('Spot', spotSchema);

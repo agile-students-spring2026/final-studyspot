@@ -2,6 +2,7 @@ import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import multer from 'multer';
 import path from 'path';
 import spotsRouter from './routes/spots.js';
@@ -13,6 +14,15 @@ import { MOCK_SPOTS, buildNewSpot } from './data/mockSpots.js';
 import authMiddleware from './middleware/auth.js';
 
 dotenv.config();
+
+mongoose
+  .connect(process.env.DB_CONNECTION_STRING)
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((err) => {
+    console.error('MongoDB connection error:', err);
+  });
 
 const app = express();
 
