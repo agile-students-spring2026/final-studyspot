@@ -1,12 +1,25 @@
 // Routes for study spot search, filtering, detail retrieval,
 // busyness updates, and reviews.
 import express from 'express';
-import { body, validationResult } from 'express-validator';
+import { body, query, validationResult } from 'express-validator';
 import Spot from '../models/Spot.js';
 import Review from '../models/Review.js';
 import { MOCK_SPOTS } from '../data/mockSpots.js';
 
 const router = express.Router();
+
+const NOISE_LEVELS = ['Quiet', 'Moderate', 'Loud'];
+const BUSYNESS_LABELS = ['Quiet', 'Moderate', 'Busy'];
+
+const listQueryValidators = [
+  query('search').optional().isString().trim().isLength({ max: 100 }),
+  query('quiet').optional().isBoolean(),
+  query('outlets').optional().isBoolean(),
+  query('groupFriendly').optional().isBoolean(),
+  query('wifi').optional().isBoolean(),
+  query('noiseLevel').optional().isIn(NOISE_LEVELS),
+  query('busyness').optional().isIn(BUSYNESS_LABELS),
+];
 
 // In-memory reviews store kept for unit tests only
 // The actual POST /reviews route now uses MongoDB
@@ -63,30 +76,47 @@ export function filterSpots(spots, query = {}) {
 }
 
 // GET /api/studyspots
-router.get('/', async (req, res) => {
+router.get('/', listQueryValidators, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
-    const query = {};
+    const mongoQuery = {};
 
     if (req.query.search) {
-      query.name = { $regex: req.query.search.trim(), $options: 'i' };
+      mongoQuery.name = { $regex: req.query.search.trim(), $options: 'i' };
     }
 
-    if (req.query.outlets === 'true') {
-      query.hasOutlets = true;
+    if (req.query.outlets !== undefined) {
+      mongoQuery.hasOutlets = req.query.outlets === 'true';
     }
 
     if (req.query.groupFriendly === 'true') {
-      query.groupFriendly = true;
+      mongoQuery.groupFriendly = true;
+    }
+
+    if (req.query.wifi !== undefined) {
+      mongoQuery.hasWifi = req.query.wifi === 'true';
+    }
+
+    if (req.query.noiseLevel) {
+      mongoQuery.noiseLevel = { $regex: `^${req.query.noiseLevel}$`, $options: 'i' };
+    }
+
+    if (req.query.busyness) {
+      mongoQuery.busynessLabel = { $regex: `^${req.query.busyness}$`, $options: 'i' };
     }
 
     if (req.query.quiet === 'true') {
-      query.$or = [
+      mongoQuery.$or = [
         { noiseLevel: { $regex: '^quiet$', $options: 'i' } },
         { amenities: 'Quiet Zone' },
       ];
     }
 
-    const spots = await Spot.find(query);
+    const spots = await Spot.find(mongoQuery);
     res.json(spots);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch study spots.' });

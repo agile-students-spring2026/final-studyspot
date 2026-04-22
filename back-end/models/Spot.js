@@ -124,7 +124,10 @@ const spotSchema = new mongoose.Schema(
       default: [],
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+  }
 );
 
 export default mongoose.models.Spot || mongoose.model('Spot', spotSchema);
