@@ -91,42 +91,59 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/studyspots/:spotId
-router.get('/:spotId', (req, res) => {
-  const spot = MOCK_SPOTS.find(s => s.id === req.params.spotId);
-  if (!spot) {
-    return res.status(404).json({ error: 'Spot not found.' });
+router.get('/:spotId', async (req, res) => {
+  try {
+    const spot = await Spot.findById(req.params.spotId);
+
+    if (!spot) {
+      return res.status(404).json({ error: 'Spot not found.' });
+    }
+
+    res.json(spot);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch study spot.' });
   }
-  res.json(spot);
 });
 
 // PATCH /api/studyspots/:spotId/busyness — update overall spot busyness
-router.patch('/:spotId/busyness', (req, res) => {
-  const { spotId } = req.params;
-  const { busyness, busynessLabel } = req.body;
+router.patch('/:spotId/busyness', async (req, res) => {
+  try {
+    const { spotId } = req.params;
+    const { busyness, busynessLabel } = req.body;
+    const parsedBusyness = parseBusynessValue(busyness);
 
-  const spot = MOCK_SPOTS.find(s => s.id === spotId);
-  if (!spot) {
-    return res.status(404).json({ error: 'Spot not found.' });
+    const spot = await Spot.findById(spotId);
+    if (!spot) {
+      return res.status(404).json({ error: 'Spot not found.' });
+    }
+
+    if (parsedBusyness === null && !busynessLabel) {
+      return res.status(400).json({
+        error: 'Provide a valid busyness value or busynessLabel.',
+      });
+    }
+
+    if (parsedBusyness !== null) {
+      spot.busyness = parsedBusyness;
+    }
+
+    if (busynessLabel) {
+      spot.busynessLabel = busynessLabel;
+    }
+
+    await spot.save();
+
+    res.json({
+      message: 'Busyness updated.',
+      spot: {
+        id: spot.id,
+        busyness: spot.busyness,
+        busynessLabel: spot.busynessLabel,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update busyness.' });
   }
-
-  const parsedBusyness = parseBusynessValue(busyness);
-
-  if (parsedBusyness === null && !busynessLabel) {
-    return res.status(400).json({ error: 'Provide a valid busyness value or busynessLabel.' });
-  }
-
-  if (parsedBusyness !== null) {
-    spot.busyness = parsedBusyness;
-  }
-
-  if (busynessLabel) {
-    spot.busynessLabel = busynessLabel;
-  }
-
-  res.json({
-    message: 'Busyness updated.',
-    spot: { id: spot.id, busyness: spot.busyness, busynessLabel: spot.busynessLabel },
-  });
 });
 
 // POST /api/studyspots/:spotId/reviews — submit a rating and optional review
@@ -166,43 +183,49 @@ router.post('/:spotId/reviews', (req, res) => {
 });
 
 // PATCH /api/studyspots/:spotId/micro-locations/:microLocationId/busyness
-router.patch('/:spotId/micro-locations/:microLocationId/busyness', (req, res) => {
-  const { spotId, microLocationId } = req.params;
-  const { busyness, busynessLabel } = req.body;
-  const parsedBusyness = parseBusynessValue(busyness);
+router.patch('/:spotId/micro-locations/:microLocationId/busyness', async (req, res) => {
+  try {
+    const { spotId, microLocationId } = req.params;
+    const { busyness, busynessLabel } = req.body;
+    const parsedBusyness = parseBusynessValue(busyness);
 
-  const spot = MOCK_SPOTS.find(s => s.id === spotId);
-  if (!spot) {
-    return res.status(404).json({ error: 'Spot not found.' });
-  }
+    const spot = await Spot.findById(spotId);
+    if (!spot) {
+      return res.status(404).json({ error: 'Spot not found.' });
+    }
 
-  if (!spot.microLocations) {
-    return res.status(404).json({ error: 'No micro-locations found for this spot.' });
-  }
+    if (!spot.microLocations || spot.microLocations.length === 0) {
+      return res.status(404).json({ error: 'No micro-locations found for this spot.' });
+    }
 
-  const microLocation = spot.microLocations.find(m => m.id === microLocationId);
-  if (!microLocation) {
-    return res.status(404).json({ error: 'Micro-location not found.' });
-  }
+    const microLocation = spot.microLocations.id(microLocationId);
+    if (!microLocation) {
+      return res.status(404).json({ error: 'Micro-location not found.' });
+    }
 
-  if (parsedBusyness !== null) {
-    microLocation.busyness = parsedBusyness;
-  }
+    if (parsedBusyness === null && !busynessLabel) {
+      return res.status(400).json({
+        error: 'Provide a valid busyness value or busyness label.',
+      });
+    }
 
-  if (parsedBusyness === null && !busynessLabel) {
-    return res.status(400).json({
-      error: 'Provide a valid busyness value or busyness label.',
+    if (parsedBusyness !== null) {
+      microLocation.busyness = parsedBusyness;
+    }
+
+    if (busynessLabel) {
+      microLocation.busynessLabel = busynessLabel;
+    }
+
+    await spot.save();
+
+    res.json({
+      message: 'Micro-location busyness updated.',
+      microLocation,
     });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update micro-location busyness.' });
   }
-
-  if (busynessLabel) {
-    microLocation.busynessLabel = busynessLabel;
-  }
-
-  res.json({
-    message: 'Micro-location busyness updated.',
-    microLocation,
-  });
 });
 
 export { reviewsStore };
