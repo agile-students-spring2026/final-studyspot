@@ -1,6 +1,7 @@
 // Routes for study spot search, filtering, detail retrieval,
 // and micro-location busyness updates.
 import express from 'express';
+import Spot from '../models/Spot.js';
 import { MOCK_SPOTS } from '../data/mockSpots.js';
 
 const router = express.Router();
@@ -59,8 +60,34 @@ export function filterSpots(spots, query = {}) {
 }
 
 // GET /api/studyspots
-router.get('/', (req, res) => {
-  res.json(filterSpots(MOCK_SPOTS, req.query));
+router.get('/', async (req, res) => {
+  try {
+    const query = {};
+
+    if (req.query.search) {
+      query.name = { $regex: req.query.search.trim(), $options: 'i' };
+    }
+
+    if (req.query.outlets === 'true') {
+      query.hasOutlets = true;
+    }
+
+    if (req.query.groupFriendly === 'true') {
+      query.groupFriendly = true;
+    }
+
+    if (req.query.quiet === 'true') {
+      query.$or = [
+        { noiseLevel: { $regex: '^quiet$', $options: 'i' } },
+        { amenities: 'Quiet Zone' },
+      ];
+    }
+
+    const spots = await Spot.find(query);
+    res.json(spots);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch study spots.' });
+  }
 });
 
 // GET /api/studyspots/:spotId
