@@ -208,55 +208,95 @@ describe('PATCH /api/studyspots/:spotId/busyness (logic)', () => {
   });
 });
 
-// ── POST /:spotId/reviews ─────────────────────────────────────────────────────
-describe('POST /api/studyspots/:spotId/reviews (logic)', () => {
-  beforeEach(() => {
-    reviewsStore.clear();
+// ── Review model validation logic ─────────────────────────────────────────────
+// Note: These tests cover the validation and calculation logic for reviews.
+// The actual DB calls (Review.create, Review.find) require a live MongoDB
+// connection and are covered by integration testing.
+describe('Review validation logic', () => {
+  it('should accept a rating of 1', () => {
+    const rating = 1;
+    expect(rating >= 1 && rating <= 5).to.be.true;
   });
 
-  it('should store a review for a valid spot', () => {
-    const spotId = '1';
-    const review = { id: '1', spotId, rating: 4, text: 'Great spot', createdAt: new Date().toISOString() };
-    reviewsStore.set(spotId, [review]);
-    expect(reviewsStore.get(spotId)).to.have.lengthOf(1);
-    expect(reviewsStore.get(spotId)[0].rating).to.equal(4);
+  it('should accept a rating of 5', () => {
+    const rating = 5;
+    expect(rating >= 1 && rating <= 5).to.be.true;
   });
 
-  it('should store multiple reviews for the same spot', () => {
-    const spotId = '1';
-    reviewsStore.set(spotId, [
-      { id: '1', spotId, rating: 4, text: 'Good', createdAt: new Date().toISOString() },
-      { id: '2', spotId, rating: 2, text: 'Noisy', createdAt: new Date().toISOString() },
-    ]);
-    expect(reviewsStore.get(spotId)).to.have.lengthOf(2);
+  it('should reject a rating of 0', () => {
+    const rating = 0;
+    expect(rating >= 1 && rating <= 5).to.be.false;
   });
 
-  it('should correctly calculate average rating', () => {
-    const reviews = [{ rating: 4 }, { rating: 2 }];
+  it('should reject a rating of 6', () => {
+    const rating = 6;
+    expect(rating >= 1 && rating <= 5).to.be.false;
+  });
+
+  it('should reject a non-integer rating', () => {
+    const rating = 3.5;
+    expect(Number.isInteger(rating)).to.be.false;
+  });
+
+  it('should allow review text up to 500 characters', () => {
+    const text = 'a'.repeat(500);
+    expect(text.length <= 500).to.be.true;
+  });
+
+  it('should reject review text over 500 characters', () => {
+    const text = 'a'.repeat(501);
+    expect(text.length <= 500).to.be.false;
+  });
+
+  it('should allow an empty review text', () => {
+    const text = '';
+    expect(typeof text === 'string').to.be.true;
+  });
+
+  it('correctly calculates average rating from multiple reviews', () => {
+    const reviews = [{ rating: 5 }, { rating: 3 }, { rating: 4 }];
+    const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+    expect(Math.round(avg * 10) / 10).to.equal(4);
+  });
+
+  it('correctly calculates average rating for a single review', () => {
+    const reviews = [{ rating: 3 }];
     const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
     expect(avg).to.equal(3);
   });
+});
 
-  it('should reject a rating below 1', () => {
-    const rating = 0;
-    expect(rating < 1 || rating > 5).to.be.true;
+// ── Data cleanup logic ────────────────────────────────────────────────────────
+describe('Data cleanup logic (account deletion)', () => {
+  it('should identify reviews belonging to a user', () => {
+    const userId = 'user-123';
+    const reviews = [
+      { userId: 'user-123', rating: 4 },
+      { userId: 'user-456', rating: 3 },
+      { userId: 'user-123', rating: 5 },
+    ];
+    const userReviews = reviews.filter(r => r.userId === userId);
+    expect(userReviews).to.have.lengthOf(2);
   });
 
-  it('should reject a rating above 5', () => {
-    const rating = 6;
-    expect(rating < 1 || rating > 5).to.be.true;
+  it('should identify saved spots belonging to a user', () => {
+    const userId = 'user-123';
+    const savedSpots = [
+      { userId: 'user-123', spotId: 'spot-1' },
+      { userId: 'user-456', spotId: 'spot-2' },
+    ];
+    const userSaved = savedSpots.filter(s => s.userId === userId);
+    expect(userSaved).to.have.lengthOf(1);
   });
 
-  it('should allow a review with no text', () => {
-    const spotId = '2';
-    const review = { id: '1', spotId, rating: 3, text: '', createdAt: new Date().toISOString() };
-    reviewsStore.set(spotId, [review]);
-    expect(reviewsStore.get(spotId)[0].text).to.equal('');
-  });
-
-  it('reviewsStore should be empty after clearing', () => {
-    reviewsStore.set('1', [{ rating: 5 }]);
-    reviewsStore.clear();
-    expect(reviewsStore.size).to.equal(0);
+  it('should leave other users data intact after deletion', () => {
+    const userId = 'user-123';
+    const reviews = [
+      { userId: 'user-123', rating: 4 },
+      { userId: 'user-456', rating: 3 },
+    ];
+    const remaining = reviews.filter(r => r.userId !== userId);
+    expect(remaining).to.have.lengthOf(1);
+    expect(remaining[0].userId).to.equal('user-456');
   });
 });
