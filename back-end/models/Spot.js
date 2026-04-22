@@ -127,4 +127,4 @@ const spotSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model('Spot', spotSchema);
+export default mongoose.models.Spot || mongoose.model('Spot', spotSchema);
