@@ -72,6 +72,11 @@ export default function AddSpotPage() {
     const [description, setDescription] = useState('');
     const [image, setImage]             = useState(null);
     const [formErrors, setFormErrors] = useState([]);
+    const [building, setBuilding]           = useState('');
+    const [noiseLevel, setNoiseLevel]       = useState('Unknown');
+    const [hasOutlets, setHasOutlets]       = useState(false);
+    const [hasWifi, setHasWifi]             = useState(false);
+    const [groupFriendly, setGroupFriendly] = useState(false);
     const navigate = useNavigate();
 
     const [hoursMode, setHoursMode] = useState('custom');
@@ -119,6 +124,11 @@ export default function AddSpotPage() {
         formData.append('hours', JSON.stringify(displayHours));
         formData.append('description', description);
         formData.append('image', image);
+        formData.append('building', building);
+        formData.append('noiseLevel', noiseLevel);
+        formData.append('hasOutlets', hasOutlets);
+        formData.append('hasWifi', hasWifi);
+        formData.append('groupFriendly', groupFriendly);
 
         try {
           const token = localStorage.getItem('token');
@@ -136,6 +146,11 @@ export default function AddSpotPage() {
 
           setSpotName('');
           setAddress('');
+          setBuilding('');
+          setNoiseLevel('Unknown');
+          setHasOutlets(false);
+          setHasWifi(false);
+          setGroupFriendly(false);
           setHoursMode('custom');
           setSameHours({ open: DEFAULT_OPEN, close: DEFAULT_CLOSE, overnight: false });
           setDailyHours(makeDefaultDailyHours());
@@ -175,7 +190,42 @@ export default function AddSpotPage() {
                 onChange={e => setAddress(e.target.value)}
                 required
               />
-            
+              <Input
+                label="Building"
+                type="text"
+                placeholder="e.g., Bobst Library"
+                value={building}
+                onChange={e => setBuilding(e.target.value)}
+                required
+              />
+              <div className={styles.inputWrapper}>
+                <label className={styles.label}>Noise Level</label>
+                <select
+                  className={styles.textarea}
+                  value={noiseLevel}
+                  onChange={e => setNoiseLevel(e.target.value)}
+                >
+                  <option value="Quiet">Quiet</option>
+                  <option value="Moderate">Moderate</option>
+                  <option value="Loud">Loud</option>
+                  <option value="Unknown">Unknown</option>
+                </select>
+              </div>
+              <fieldset className={styles.hoursFieldset}>
+                <legend className={styles.label}>Amenities</legend>
+                <label className={styles.checkboxRow}>
+                  <input type="checkbox" checked={hasOutlets} onChange={e => setHasOutlets(e.target.checked)} />
+                  Has Outlets
+                </label>
+                <label className={styles.checkboxRow}>
+                  <input type="checkbox" checked={hasWifi} onChange={e => setHasWifi(e.target.checked)} />
+                  Has WiFi
+                </label>
+                <label className={styles.checkboxRow}>
+                  <input type="checkbox" checked={groupFriendly} onChange={e => setGroupFriendly(e.target.checked)} />
+                  Group Friendly
+                </label>
+              </fieldset>
               <fieldset className={styles.hoursFieldset}>
                 <legend className={styles.label}>Hours of Operation</legend>
                 <label className={styles.checkboxRow}>
