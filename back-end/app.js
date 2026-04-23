@@ -36,9 +36,7 @@ app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'StudySpot API' });
 });
 
-
 app.use('/api/studyspots', spotsRouter);
-// TODO: wire additional routers here (e.g. authRouter)
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/users', savedRouter);
