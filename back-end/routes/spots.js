@@ -4,7 +4,9 @@ import express from 'express';
 import { body, query, validationResult } from 'express-validator';
 import Spot from '../models/Spot.js';
 import Review from '../models/Review.js';
-import { MOCK_SPOTS } from '../data/mockSpots.js';
+import multer from 'multer';
+import path from 'path';
+import authMiddleware from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -20,6 +22,20 @@ const listQueryValidators = [
   query('noiseLevel').optional().isIn(NOISE_LEVELS),
   query('busyness').optional().isIn(BUSYNESS_LABELS),
 ];
+
+// ── File uploads ──────────────────────────────────────────────────────────────
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/uploads');
+  },
+  filename: function (req, file, cb) {
+    const extension = path.extname(file.originalname);
+    const basenameWithoutExtension = path.basename(file.originalname, extension);
+    const newName = `${basenameWithoutExtension}-${Date.now()}${Math.random()}${extension}`;
+    cb(null, newName);
+  },
+});
+const upload = multer({ storage });
 
 // In-memory reviews store kept for unit tests only
 // The actual POST /reviews route now uses MongoDB
@@ -272,6 +288,86 @@ router.patch('/:spotId/micro-locations/:microLocationId/busyness', async (req, r
     });
   } catch (error) {
     res.status(500).json({ error: 'Failed to update micro-location busyness.' });
+  }
+});
+
+
+const addSpotValidation = [
+  body('spotName')
+    .notEmpty().withMessage('Spot name is required.')
+    .isString().withMessage('Spot name must be a string.')
+    .trim()
+    .isLength({ max: 200 }).withMessage('Spot name must be 200 characters or fewer.'),
+  body('address')
+    .notEmpty().withMessage('Address is required.')
+    .isString().withMessage('Address must be a string.')
+    .trim(),
+  body('description')
+    .notEmpty().withMessage('Description is required.')
+    .isString().withMessage('Description must be a string.')
+    .trim(),
+  body('hours')
+    .notEmpty().withMessage('Hours are required.'),
+    body('building')
+    .notEmpty().withMessage('Building name is required.')
+    .isString().withMessage('Building must be a string.')
+    .trim(),
+  body('noiseLevel')
+    .optional()
+    .isIn(['Quiet', 'Moderate', 'Loud', 'Unknown']).withMessage('Invalid noise level.'),
+  body('hasOutlets')
+    .optional()
+    .isBoolean().withMessage('hasOutlets must be true or false.'),
+  body('hasWifi')
+    .optional()
+    .isBoolean().withMessage('hasWifi must be true or false.'),
+  body('groupFriendly')
+    .optional()
+    .isBoolean().withMessage('groupFriendly must be true or false.'),
+];
+
+router.post('/', authMiddleware, upload.single('image'), addSpotValidation, async (req, res) => {
+  try {
+    const { spotName, building, address, hours, description, noiseLevel, hasOutlets, hasWifi, groupFriendly } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+    let parsedHours;
+    try {
+      parsedHours = JSON.parse(hours);
+    } catch {
+      return res.status(400).json({ error: 'Invalid hours format. Expected JSON.' });
+    }
+    if (!Array.isArray(parsedHours) || parsedHours.length === 0) {
+      return res.status(400).json({ error: 'Hours must be a non-empty array.' });
+    }
+    for (const entry of parsedHours) {
+      if (!entry.day || typeof entry.day !== 'string') {
+        return res.status(400).json({ error: 'Each hours entry must have a day.' });
+      }
+      if (typeof entry.time !== 'string') {
+        return res.status(400).json({ error: `Missing time for ${entry.day}.` });
+      }
+    }
+
+    const newSpot = await Spot.create({
+      name: spotName,
+      building: building || spotName,       // see note below about 'building'
+      address,
+      googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
+      description,
+      hours: parsedHours,       // already [{day, time}] — matches hourSchema
+      imageUrl: req.file ? `/static/uploads/${req.file.filename}` : '',
+      noiseLevel: noiseLevel || 'Unknown',
+      hasOutlets: hasOutlets === 'true' || hasOutlets === true,
+      hasWifi: hasWifi === 'true' || hasWifi === true,
+      groupFriendly: groupFriendly === 'true' || groupFriendly === true
+    });
+    res.status(201).json(newSpot);
+  } catch (err) {
+    console.error('Error creating spot:', err);
+    res.status(500).json({ error: 'Failed to create study spot.' });
   }
 });
 
