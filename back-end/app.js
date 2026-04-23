@@ -67,8 +67,14 @@ app.post('/api/studyspots', authMiddleware, upload.single('image'), async (req, 
       amenities,
     } = req.body;
 
+<<<<<<< Updated upstream
     if (!spotName || !address || !hours || !description) {
       return res.status(400).json({ error: 'Missing required fields.' });
+=======
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+>>>>>>> Stashed changes
     }
 
     let parsedHours;
