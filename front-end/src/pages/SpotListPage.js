@@ -16,6 +16,7 @@ const FILTER_OPTIONS = [
 export default function SpotListPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [savedSpots, setSavedSpots] = useState([]);
   const [activeFilters, setActiveFilters] = useState([]);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -26,20 +27,43 @@ export default function SpotListPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('/api/studyspots', { cache: 'no-store' })
+    const handle = setTimeout(() => setDebouncedSearch(search), 250);
+    return () => clearTimeout(handle);
+  }, [search]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const params = new URLSearchParams();
+
+    if (debouncedSearch.trim()) params.set('search', debouncedSearch.trim());
+    if (activeFilters.includes('quiet')) params.set('quiet', 'true');
+    if (activeFilters.includes('outlets')) params.set('outlets', 'true');
+    if (activeFilters.includes('groupFriendly')) params.set('groupFriendly', 'true');
+
+    if (filters.noiseLevel) params.set('noiseLevel', filters.noiseLevel);
+    if (filters.outlets) params.set('outlets', filters.outlets === 'Yes' ? 'true' : 'false');
+    if (filters.wifi) params.set('wifi', filters.wifi === 'Yes' ? 'true' : 'false');
+    if (filters.busyness) params.set('busyness', filters.busyness);
+
+    setLoading(true);
+    fetch(`/api/studyspots?${params}`, { signal: controller.signal, cache: 'no-store' })
       .then(res => {
         if (!res.ok) throw new Error(`Request failed: ${res.status}`);
         return res.json();
       })
       .then(data => {
         setSpots(data);
+        setError(null);
         setLoading(false);
       })
       .catch(err => {
+        if (err.name === 'AbortError') return;
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+
+    return () => controller.abort();
+  }, [debouncedSearch, activeFilters, filters]);
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
@@ -56,43 +80,6 @@ export default function SpotListPage() {
         : [...prev, filterKey]
     );
   }
-
-  function matchesFilter(spot, filterKey) {
-    switch (filterKey) {
-      case 'quiet':
-        return spot.amenities.includes('Quiet Zone') || spot.busyness <= 40;
-      case 'outlets':
-        return spot.amenities.includes('Outlets');
-      case 'groupFriendly':
-        return (
-          spot.groupFriendly === true ||
-          spot.amenities.includes('Group Tables') ||
-          spot.amenities.includes('Whiteboards')
-        );
-      default:
-        return true;
-    }
-  }
-
-  const filtered = spots.filter(spot => {
-    const matchesSearch =
-      spot.name.toLowerCase().includes(search.toLowerCase()) ||
-      spot.building.toLowerCase().includes(search.toLowerCase());
-    const matchesActiveFilters = activeFilters.every(filterKey =>
-      matchesFilter(spot, filterKey)
-    );
-    const matchesNoise =
-      !filters.noiseLevel || spot.noiseLevel === filters.noiseLevel;
-    const matchesOutlets =
-      !filters.outlets ||
-      (filters.outlets === 'Yes' ? spot.hasOutlets : !spot.hasOutlets);
-    const matchesWifi =
-      !filters.wifi ||
-      (filters.wifi === 'Yes' ? spot.hasWifi : !spot.hasWifi);
-    const matchesBusyness =
-      !filters.busyness || spot.busynessLabel === filters.busyness;
-    return matchesSearch && matchesActiveFilters && matchesNoise && matchesOutlets && matchesWifi && matchesBusyness;
-  });
 
   return (
     <div className={styles.page}>
@@ -145,10 +132,10 @@ export default function SpotListPage() {
         {error && !loading && (
           <p className={styles.empty}>Could not load study spots: {error}</p>
         )}
-        {!loading && !error && filtered.length === 0 && (
+        {!loading && !error && spots.length === 0 && (
           <p className={styles.empty}>No spots match your search or filters.</p>
         )}
-        {!loading && !error && filtered.map(spot => (
+        {!loading && !error && spots.map(spot => (
           <div key={spot.id} className={styles.card}>
             <div className={styles.cardTop}>
               <h2 className={styles.cardTitle}>{spot.name}</h2>

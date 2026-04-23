@@ -10,8 +10,8 @@ import usersRouter from './routes/users.js';
 import savedRouter from './routes/saved.js';
 import authRouter from './routes/auth.js';
 import { destroySession } from './utils/session.js';
-import Spot from './models/Spot.js';
 import authMiddleware from './middleware/auth.js';
+import Spot from './models/Spot.js';
 import { body, validationResult } from 'express-validator';
 
 dotenv.config();
@@ -90,8 +90,6 @@ app.post('/api/studyspots', authMiddleware, upload.single('image'), addSpotValid
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
-  
-
     let parsedHours;
     try {
       parsedHours = JSON.parse(hours);
