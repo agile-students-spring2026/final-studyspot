@@ -40,6 +40,11 @@ export default function SpotListPage() {
     if (activeFilters.includes('outlets')) params.set('outlets', 'true');
     if (activeFilters.includes('groupFriendly')) params.set('groupFriendly', 'true');
 
+    if (filters.noiseLevel) params.set('noiseLevel', filters.noiseLevel);
+    if (filters.outlets) params.set('outlets', filters.outlets === 'Yes' ? 'true' : 'false');
+    if (filters.wifi) params.set('wifi', filters.wifi === 'Yes' ? 'true' : 'false');
+    if (filters.busyness) params.set('busyness', filters.busyness);
+
     setLoading(true);
     fetch(`/api/studyspots?${params}`, { signal: controller.signal, cache: 'no-store' })
       .then(res => {
@@ -58,7 +63,7 @@ export default function SpotListPage() {
       });
 
     return () => controller.abort();
-  }, [debouncedSearch, activeFilters]);
+  }, [debouncedSearch, activeFilters, filters]);
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
