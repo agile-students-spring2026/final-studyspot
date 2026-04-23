@@ -163,14 +163,27 @@ export default function SpotDetailsPage() {
           <h1 className={styles.spotName}>{spot.name}</h1>
           <button
             className={`${styles.saveBtn} ${saved ? styles.saveBtnActive : ''}`}
-            onClick={() => {
+            onClick={async () => {
+              const token = localStorage.getItem('token');
+              const spotId = spot._id || spot.id;
               if (!saved) {
                 setSaved(true);
                 setShowSavedOverlay(true);
+                try {
+                  await fetch(`/api/users/me/saved/${spotId}`, {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                } catch {}
               } else {
                 setSaved(false);
+                try {
+                  await fetch(`/api/users/me/saved/${spotId}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                } catch {}
               }
-              // TODO: call API to save/unsave
             }}
           >
             <BookmarkIcon filled={saved} />

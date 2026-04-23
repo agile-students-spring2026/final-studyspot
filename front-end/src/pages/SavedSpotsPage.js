@@ -1,81 +1,94 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '../components/Button';
 import BottomNav from '../components/BottomNav';
 import styles from './SavedSpotsPage.module.css';
 
-// Mock data (will be added in backend sprint)
-const mockSavedSpots = [
-{
-    id: 1,
-    name: 'Study Location 1',
-    rating: 3.5,
-    reviews: 23,
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor',
-    image: 'https://picsum.photos/seed/spot1/400/200',
-},
-{
-    id: 2,
-    name: 'Study Location 2',
-    rating: 4.8,
-    reviews: 58,
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor',
-    image: 'https://picsum.photos/seed/spot2/400/200',
-},
-];
-
 export default function SavedSpotsPage() {
-const [savedSpots, setSavedSpots] = useState(mockSavedSpots);
-const [showConfirm, setShowConfirm] = useState(null);  // holds spot id
-const [showSuccess, setShowSuccess] = useState(false);
+    const [savedSpots, setSavedSpots] = useState([]);
+    const [showConfirm, setShowConfirm] = useState(null);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-function handleRemove(spotId) {
-    setSavedSpots(savedSpots.filter(spot => spot.id !== spotId));
-    setShowConfirm(null);
-    setShowSuccess(true);
-}
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) { setLoading(false); return; }
+        fetch('/api/users/me/saved', {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then(res => res.ok ? res.json() : { savedSpots: [] })
+            .then(data => setSavedSpots(data.savedSpots || []))
+            .catch(() => setSavedSpots([]))
+            .finally(() => setLoading(false));
+    }, []);
 
-return (
-<div className={styles.page}>
-    <header className={styles.header}>
-    <h1 className={styles.logo}>StudySpot</h1>
-    </header>
+    async function handleRemove(spotId) {
+        const token = localStorage.getItem('token');
+        try {
+            await fetch(`/api/users/me/saved/${spotId}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+            });
+        } catch {
+            // continue regardless
+        }
+        setSavedSpots(prev => prev.filter(spot => (spot._id || spot.id) !== spotId));
+        setShowConfirm(null);
+        setShowSuccess(true);
+    }
 
-    <h2 className={styles.title}>Saved Spots</h2>
+    return (
+        <div className={styles.page}>
+            <header className={styles.header}>
+            <h1 className={styles.logo}>StudySpot</h1>
+            </header>
 
-    <div className={styles.spotsList}>
-    {savedSpots.map(spot => (
-        <div key={spot.id} className={styles.card}>
-        <div className={styles.cardHeader}>
-            <h3 className={styles.spotName}>{spot.name}</h3>
-            <p className={styles.spotMeta}>Rating {spot.rating}/5 - {spot.reviews} reviews</p>
+            <h2 className={styles.title}>Saved Spots</h2>
+
+            {loading && <p style={{ textAlign: 'center' }}>Loading...</p>}
+
+            {!loading && savedSpots.length === 0 && (
+                <p style={{ textAlign: 'center', color: '#888', marginTop: '2rem' }}>
+                    No saved spots yet. Save a spot from its details page!
+                </p>
+            )}
+
+            <div className={styles.spotsList}>
+            {savedSpots.map(spot => {
+                const id = spot._id || spot.id;
+                return (
+                    <div key={id} className={styles.card}>
+                    <div className={styles.cardHeader}>
+                        <h3 className={styles.spotName}>{spot.name}</h3>
+                        <p className={styles.spotMeta}>
+                            {spot.rating ? `Rating ${spot.rating}/5` : ''}
+                            {spot.reviewCount ? ` - ${spot.reviewCount} reviews` : ''}
+                        </p>
+                    </div>
+                    {spot.image && <img src={spot.image} alt={spot.name} className={styles.spotImage} />}
+                    {spot.description && <p className={styles.spotDescription}>{spot.description}</p>}
+                    <Button variant="secondary" onClick={() => setShowConfirm(id)}>
+                        Remove from Saved Spots
+                    </Button>
+                    </div>
+                );
+            })}
+            </div>
+
+            <BottomNav />
+
+            {showConfirm && (
+            <div className={styles.overlay}>
+              <div className={styles.modal}>
+                <p className={styles.modalText}>
+                  Are you sure you want to remove this spot?
+                </p>
+                <Button onClick={() => handleRemove(showConfirm)}>Remove</Button>
+                <button className={styles.cancelBtn} onClick={() => setShowConfirm(null)}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+            )}
         </div>
-        <img src={spot.image} alt={spot.name} className={styles.spotImage} />
-        <p className={styles.spotDescription}>{spot.description}</p>
-        <Button variant="secondary" onClick={() => setShowConfirm(spot.id)}>
-            Remove from Saved Spots
-        </Button>
-        </div>
-    ))}
-    </div>
-
-    {/* Bottom Navigation */}
-    <BottomNav />
-
-    {/* Remove Confirmation Overlay */}
-    {showConfirm && (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
-        <p className={styles.modalText}>
-          Are you sure you want to remove this spot?
-        </p>
-        <Button onClick={() => handleRemove(showConfirm)}>Remove</Button>
-        <button className={styles.cancelBtn} onClick={() => setShowConfirm(null)}>
-          Cancel
-        </button>
-      </div>
-    </div>
-    )}
-    
-</div>
-);
+    );
 }

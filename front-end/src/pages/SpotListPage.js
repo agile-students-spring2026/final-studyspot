@@ -27,6 +27,15 @@ export default function SpotListPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    fetch('/api/users/me/saved', { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => res.ok ? res.json() : { savedSpots: [] })
+      .then(data => setSavedSpots((data.savedSpots || []).map(s => s._id || s.id)))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const handle = setTimeout(() => setDebouncedSearch(search), 250);
     return () => clearTimeout(handle);
   }, [search]);
@@ -67,10 +76,18 @@ export default function SpotListPage() {
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '');
 
-  function toggleSave(spotId) {
+  async function toggleSave(spotId) {
+    const token = localStorage.getItem('token');
+    const isSaved = savedSpots.includes(spotId);
     setSavedSpots(prev =>
-      prev.includes(spotId) ? prev.filter(id => id !== spotId) : [...prev, spotId]
+      isSaved ? prev.filter(id => id !== spotId) : [...prev, spotId]
     );
+    try {
+      await fetch(`/api/users/me/saved/${spotId}`, {
+        method: isSaved ? 'DELETE' : 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch {}
   }
 
   function toggleFilter(filterKey) {

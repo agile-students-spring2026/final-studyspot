@@ -1,20 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
 import Button from '../components/Button';
 import styles from './ProfilePage.module.css';
 
-// Set unread notifications on first visit (mock — will come from back-end later)
 if (localStorage.getItem('hasUnreadNotifications') === null) {
     localStorage.setItem('hasUnreadNotifications', 'true');
 }
-
-// Mock user data (will be added in backend sprint)
-const mockUser = {
-    name: 'Name',
-    email: 'yourname@university.edu',
-    image: 'https://picsum.photos/seed/user1/150/150',
-};
 
 export default function ProfilePage() {
     const navigate = useNavigate();
@@ -22,18 +14,55 @@ export default function ProfilePage() {
     const [hasUnread, setHasUnread] = useState(
         localStorage.getItem('hasUnreadNotifications') === 'true'
     );
+    const [user, setUser] = useState({
+        name: localStorage.getItem('userName') || localStorage.getItem('userEmail') || 'User',
+        email: localStorage.getItem('userEmail') || '',
+        image: 'https://picsum.photos/seed/user1/150/150',
+    });
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        fetch('/api/users/me', {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data?.user) {
+                    setUser(prev => ({
+                        ...prev,
+                        name: data.user.name || prev.name,
+                        email: data.user.email || prev.email,
+                        image: data.user.profileImage || prev.image,
+                    }));
+                }
+            })
+            .catch(() => {});
+    }, []);
 
     function handleDeleteAccount() {
-        // TODO: call delete API
-        console.log('Account deleted');
-        setShowConfirm(false);
-        navigate('/login');
+        const token = localStorage.getItem('token');
+        fetch('/api/users/me', {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
+        }).finally(() => {
+            localStorage.clear();
+            setShowConfirm(false);
+            navigate('/login');
+        });
     }
 
     function handleLogout() {
-        // TODO: clear auth and redirect to login
-        console.log('Logging out user...');
-        navigate('/login');
+        const token = localStorage.getItem('token');
+        fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+        }).finally(() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            navigate('/login');
+        });
     }
 
     return (
@@ -45,9 +74,9 @@ export default function ProfilePage() {
         <h2 className={styles.title}>My Profile</h2>
 
         <div className={styles.profileSection}>
-            <img src={mockUser.image} alt="Profile" className={styles.profileImage} />
-            <h3 className={styles.userName}>{mockUser.name}</h3>
-            <p className={styles.userEmail}>{mockUser.email}</p>
+            <img src={user.image} alt="Profile" className={styles.profileImage} />
+            <h3 className={styles.userName}>{user.name}</h3>
+            <p className={styles.userEmail}>{user.email}</p>
         </div>
 
         <nav className={styles.menu}>
@@ -62,7 +91,7 @@ export default function ProfilePage() {
               Delete Account
             </button>
         </nav>
-        
+
         {showConfirm && (
             <div className={styles.overlay}>
               <div className={styles.modal}>

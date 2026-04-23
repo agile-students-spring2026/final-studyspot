@@ -6,23 +6,44 @@ import styles from './EditProfilePage.module.css';
 
 export default function EditProfilePage() {
     const navigate = useNavigate();
-    // Pre-fill from current user data (mock for now, API later)
-    const [name, setName] = useState('Name');
-    const [email, setEmail] = useState('yourname@university.edu');
+    const [name, setName] = useState(localStorage.getItem('userName') || localStorage.getItem('userEmail') || '');
+    const [email, setEmail] = useState(localStorage.getItem('userEmail') || '');
     const [imagePreview, setImagePreview] = useState('https://picsum.photos/seed/user1/150/150');
     const [error, setError] = useState('');
+
     function handleImageChange(e) {
         const file = e.target.files[0];
         if (file) {
             setImagePreview(URL.createObjectURL(file));
         }
     }
-    function handleSubmit(e) {
+
+    async function handleSubmit(e) {
         e.preventDefault();
-        // TODO: call update API
-        console.log('Profile updated:', { name, email });
+        setError('');
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch('/api/users/me', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ name, email }),
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                setError(data.error || 'Failed to update profile.');
+                return;
+            }
+        } catch {
+            // If API fails, still save locally so the UI reflects the change
+        }
+        localStorage.setItem('userName', name);
+        localStorage.setItem('userEmail', email);
         navigate('/profile');
     }
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
