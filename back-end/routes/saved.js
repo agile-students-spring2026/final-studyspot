@@ -12,19 +12,31 @@
  */
 
 import express from 'express';
+import mongoose from 'mongoose';
 import { MOCK_SPOTS } from '../data/mockSpots.js';
 import SavedSpot from '../models/SavedSpot.js';
+import Spot from '../models/Spot.js';
 import authMiddleware from '../middleware/auth.js';
 
 const router = express.Router();
+
+function isObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === id;
+}
 
 // GET /api/users/me/saved — return all saved spots for the current user
 router.get('/me/saved', authMiddleware, async (req, res) => {
   try {
     const savedDocs = await SavedSpot.find({ userId: req.userId });
     const savedIds = savedDocs.map(doc => doc.spotId);
-    const spots = MOCK_SPOTS.filter(spot => savedIds.includes(spot.id));
-    res.json({ savedSpots: spots });
+
+    const objectIds = savedIds.filter(isObjectId);
+    const stringIds = savedIds.filter(id => !isObjectId(id));
+
+    const dbSpots = objectIds.length > 0 ? await Spot.find({ _id: { $in: objectIds } }) : [];
+    const mockSpots = MOCK_SPOTS.filter(spot => stringIds.includes(spot.id));
+
+    res.json({ savedSpots: [...dbSpots, ...mockSpots] });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
   }
@@ -34,10 +46,17 @@ router.get('/me/saved', authMiddleware, async (req, res) => {
 router.post('/me/saved/:spotId', authMiddleware, async (req, res) => {
   try {
     const { spotId } = req.params;
-    const spot = MOCK_SPOTS.find(s => s.id === spotId);
+
+    let spot = null;
+    if (isObjectId(spotId)) {
+      spot = await Spot.findById(spotId);
+    } else {
+      spot = MOCK_SPOTS.find(s => s.id === spotId) || null;
+    }
     if (!spot) {
       return res.status(404).json({ error: 'Spot not found.' });
     }
+
     const already = await SavedSpot.findOne({ userId: req.userId, spotId });
     if (already) {
       return res.status(409).json({ error: 'Spot already saved.' });

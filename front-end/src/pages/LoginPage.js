@@ -34,6 +34,7 @@ export default function LoginPage() {
       return;
     }
     localStorage.setItem('token', data.token);
+    localStorage.setItem('userEmail', email);
     navigate('/spots');
   }
 
