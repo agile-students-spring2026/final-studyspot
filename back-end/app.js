@@ -12,6 +12,7 @@ import authRouter from './routes/auth.js';
 import { destroySession } from './utils/session.js';
 import Spot from './models/Spot.js';
 import authMiddleware from './middleware/auth.js';
+import { body, validationResult } from 'express-validator';
 
 dotenv.config();
 
@@ -52,7 +53,25 @@ app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'StudySpot API' });
 });
 
-app.post('/api/studyspots', authMiddleware, upload.single('image'), async (req, res) => {
+const addSpotValidation = [
+  body('spotName')
+    .notEmpty().withMessage('Spot name is required.')
+    .isString().withMessage('Spot name must be a string.')
+    .trim()
+    .isLength({ max: 200 }).withMessage('Spot name must be 200 characters or fewer.'),
+  body('address')
+    .notEmpty().withMessage('Address is required.')
+    .isString().withMessage('Address must be a string.')
+    .trim(),
+  body('description')
+    .notEmpty().withMessage('Description is required.')
+    .isString().withMessage('Description must be a string.')
+    .trim(),
+  body('hours')
+    .notEmpty().withMessage('Hours are required.'),
+];
+
+app.post('/api/studyspots', authMiddleware, upload.single('image'), addSpotValidation, async (req, res) => {
   try {
     const {
       spotName,
@@ -67,15 +86,11 @@ app.post('/api/studyspots', authMiddleware, upload.single('image'), async (req, 
       amenities,
     } = req.body;
 
-<<<<<<< Updated upstream
-    if (!spotName || !address || !hours || !description) {
-      return res.status(400).json({ error: 'Missing required fields.' });
-=======
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
->>>>>>> Stashed changes
     }
+  
 
     let parsedHours;
     try {
