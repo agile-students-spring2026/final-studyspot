@@ -10,8 +10,8 @@ import usersRouter from './routes/users.js';
 import savedRouter from './routes/saved.js';
 import authRouter from './routes/auth.js';
 import { destroySession } from './utils/session.js';
-import { MOCK_SPOTS, buildNewSpot } from './data/mockSpots.js';
 import authMiddleware from './middleware/auth.js';
+import Spot from './models/Spot.js';
 
 dotenv.config();
 
@@ -52,33 +52,46 @@ app.get('/', (req, res) => {
   res.json({ status: 'ok', message: 'StudySpot API' });
 });
 
-app.post('/api/studyspots', authMiddleware, upload.single('image'), (req, res) => {
-  const { spotName, address, hours, description } = req.body;
-  if (!spotName || !address || !hours || !description) {
-    return res.status(400).json({ error: 'Missing required fields.' });
-  }
-
-  let parsedHours;
+app.post('/api/studyspots', authMiddleware, upload.single('image'), async (req, res) => {
   try {
-    parsedHours = JSON.parse(hours);
-  } catch {
-    return res.status(400).json({ error: 'Invalid hours format. Expected JSON.' });
-  }
-  if (!Array.isArray(parsedHours) || parsedHours.length === 0) {
-    return res.status(400).json({ error: 'Hours must be a non-empty array.' });
-  }
-  for (const entry of parsedHours) {
-    if (!entry.day || typeof entry.day !== 'string') {
-      return res.status(400).json({ error: 'Each hours entry must have a day.' });
-    }
-    if (typeof entry.time !== 'string') {
-      return res.status(400).json({ error: `Missing time for ${entry.day}.` });
-    }
-  }
 
-  const newSpot = buildNewSpot({ spotName, address, hours: parsedHours, description }, req.file?.filename);
-  MOCK_SPOTS.push(newSpot);
-  res.status(201).json(newSpot);
+    const { spotName, address, hours, description } = req.body;
+    if (!spotName || !address || !hours || !description) {
+      return res.status(400).json({ error: 'Missing required fields.' });
+    }
+
+    let parsedHours;
+    try {
+      parsedHours = JSON.parse(hours);
+    } catch {
+      return res.status(400).json({ error: 'Invalid hours format. Expected JSON.' });
+    }
+    if (!Array.isArray(parsedHours) || parsedHours.length === 0) {
+      return res.status(400).json({ error: 'Hours must be a non-empty array.' });
+    }
+    for (const entry of parsedHours) {
+      if (!entry.day || typeof entry.day !== 'string') {
+        return res.status(400).json({ error: 'Each hours entry must have a day.' });
+      }
+      if (typeof entry.time !== 'string') {
+        return res.status(400).json({ error: `Missing time for ${entry.day}.` });
+      }
+    }
+
+    const newSpot = await Spot.create({
+      name: spotName,
+      building: spotName,       // see note below about 'building'
+      address,
+      googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
+      description,
+      hours: parsedHours,       // already [{day, time}] — matches hourSchema
+      imageUrl: req.file ? `/static/uploads/${req.file.filename}` : '',
+    });
+    res.status(201).json(newSpot);
+  } catch (err) {
+    console.error('Error creating spot:', err);
+    res.status(500).json({ error: 'Failed to create study spot.' });
+  }
 });
 
 app.use('/api/studyspots', spotsRouter);
