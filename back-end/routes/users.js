@@ -13,8 +13,7 @@
 
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { MOCK_USERS } from '../data/mockUsers.js';
-import { destroySession } from '../utils/session.js';
+import User from '../models/User.js';
 import authMiddleware from '../middleware/auth.js';
 import Review from '../models/Review.js';
 import SavedSpot from '../models/SavedSpot.js';
@@ -22,13 +21,16 @@ import SavedSpot from '../models/SavedSpot.js';
 const router = express.Router();
 
 // GET /api/users/me — return current user's profile
-router.get('/me', authMiddleware, (req, res) => {
-  const user = MOCK_USERS.find(u => u.id === req.userId);
-  if (!user) {
-    return res.status(404).json({ error: 'User not found.' });
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    res.json({ user });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
   }
-  const { password, ...safeUser } = user;
-  res.json({ user: safeUser });
 });
 
 // PUT /api/users/me — update current user's name and email
@@ -44,42 +46,42 @@ const updateValidation = [
     .normalizeEmail(),
 ];
 
-router.put('/me', authMiddleware, updateValidation, (req, res) => {
+router.put('/me', authMiddleware, updateValidation, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
+  try {
+    const { name, email } = req.body;
+    const updates = {};
+    if (name) updates.name = name;
+    if (email) updates.email = email;
 
-  const user = MOCK_USERS.find(u => u.id === req.userId);
-  if (!user) {
-    return res.status(404).json({ error: 'User not found.' });
+    const user = await User.findByIdAndUpdate(req.userId, updates, { new: true }).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    res.json({ user });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
   }
-  const { name, email } = req.body;
-  if (name) user.name = name;
-  if (email) user.email = email;
-  const { password, ...safeUser } = user;
-  res.json({ user: safeUser });
 });
 
 // DELETE /api/users/me — delete current user's account and all related data
 router.delete('/me', authMiddleware, async (req, res) => {
   try {
-    const index = MOCK_USERS.findIndex(u => u.id === req.userId);
-    if (index === -1) {
+    const user = await User.findByIdAndDelete(req.userId);
+    if (!user) {
       return res.status(404).json({ error: 'User not found.' });
     }
 
-    // Data cleanup — remove all data associated with this user
+    // Clean up all data associated with this user
     await Review.deleteMany({ userId: req.userId });
     await SavedSpot.deleteMany({ userId: req.userId });
 
-    // Remove user from mock store
-    // TODO: replace with User.findByIdAndDelete(req.userId) in JWT sprint
-    MOCK_USERS.splice(index, 1);
-
     res.json({ message: 'Account and all associated data deleted.' });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to delete account.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
   }
 });
 

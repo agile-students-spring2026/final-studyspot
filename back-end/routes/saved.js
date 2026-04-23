@@ -13,43 +13,54 @@
 
 import express from 'express';
 import { MOCK_SPOTS } from '../data/mockSpots.js';
+import SavedSpot from '../models/SavedSpot.js';
 import authMiddleware from '../middleware/auth.js';
 
 const router = express.Router();
 
-// In-memory saved spots store: { userId -> Set of spotIds }
-const savedSpotsStore = new Map();
-
 // GET /api/users/me/saved — return all saved spots for the current user
-router.get('/me/saved', authMiddleware, (req, res) => {
-  const spotIds = savedSpotsStore.get(req.userId) || new Set();
-  const spots = MOCK_SPOTS.filter(spot => spotIds.has(spot.id));
-  res.json({ savedSpots: spots });
+router.get('/me/saved', authMiddleware, async (req, res) => {
+  try {
+    const savedDocs = await SavedSpot.find({ userId: req.userId });
+    const savedIds = savedDocs.map(doc => doc.spotId);
+    const spots = MOCK_SPOTS.filter(spot => savedIds.includes(spot.id));
+    res.json({ savedSpots: spots });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
+  }
 });
 
 // POST /api/users/me/saved/:spotId — save a spot for the current user
-router.post('/me/saved/:spotId', authMiddleware, (req, res) => {
-  const { spotId } = req.params;
-  const spot = MOCK_SPOTS.find(s => s.id === spotId);
-  if (!spot) {
-    return res.status(404).json({ error: 'Spot not found.' });
+router.post('/me/saved/:spotId', authMiddleware, async (req, res) => {
+  try {
+    const { spotId } = req.params;
+    const spot = MOCK_SPOTS.find(s => s.id === spotId);
+    if (!spot) {
+      return res.status(404).json({ error: 'Spot not found.' });
+    }
+    const already = await SavedSpot.findOne({ userId: req.userId, spotId });
+    if (already) {
+      return res.status(409).json({ error: 'Spot already saved.' });
+    }
+    await SavedSpot.create({ userId: req.userId, spotId });
+    res.json({ message: 'Spot saved.', spot });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
   }
-  if (!savedSpotsStore.has(req.userId)) {
-    savedSpotsStore.set(req.userId, new Set());
-  }
-  savedSpotsStore.get(req.userId).add(spotId);
-  res.json({ message: 'Spot saved.', spot });
 });
 
 // DELETE /api/users/me/saved/:spotId — remove a saved spot
-router.delete('/me/saved/:spotId', authMiddleware, (req, res) => {
-  const { spotId } = req.params;
-  const spotIds = savedSpotsStore.get(req.userId);
-  if (!spotIds || !spotIds.has(spotId)) {
-    return res.status(404).json({ error: 'Saved spot not found.' });
+router.delete('/me/saved/:spotId', authMiddleware, async (req, res) => {
+  try {
+    const { spotId } = req.params;
+    const result = await SavedSpot.findOneAndDelete({ userId: req.userId, spotId });
+    if (!result) {
+      return res.status(404).json({ error: 'Saved spot not found.' });
+    }
+    res.json({ message: 'Spot removed from saved.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error.' });
   }
-  spotIds.delete(spotId);
-  res.json({ message: 'Spot removed from saved.' });
 });
 
 export default router;
