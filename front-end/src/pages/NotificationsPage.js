@@ -1,37 +1,43 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BottomNav from '../components/BottomNav';
 import styles from './NotificationsPage.module.css';
 
-// Mock notifications (will come from back-end later)
-const mockNotifications = [
-  {
-    id: 1,
-    text: 'Someone left a review on Bobst Library 3rd Floor.',
-    time: '2 hours ago',
-    read: false,
-  },
-  {
-    id: 2,
-    text: 'A spot you saved, Kimmel Center Lounge, has a new review.',
-    time: '1 day ago',
-    read: false,
-  },
-  {
-    id: 3,
-    text: 'Welcome to StudySpot! Start exploring study spaces near you.',
-    time: '3 days ago',
-    read: true,
-  },
-];
-
 export default function NotificationsPage() {
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mark notifications as read when this page is opened
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) { setLoading(false); return; }
+
+    fetch('/api/users/me/notifications', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => res.ok ? res.json() : { notifications: [] })
+      .then(data => setNotifications(data.notifications || []))
+      .catch(() => setNotifications([]))
+      .finally(() => setLoading(false));
+
+    // Mark all as read
+    fetch('/api/users/me/notifications/read-all', {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {});
+
     localStorage.setItem('hasUnreadNotifications', 'false');
   }, []);
+
+  function timeAgo(dateStr) {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins} minute${mins !== 1 ? 's' : ''} ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} hour${hrs !== 1 ? 's' : ''} ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days} day${days !== 1 ? 's' : ''} ago`;
+  }
 
   return (
     <div className={styles.page}>
@@ -42,11 +48,19 @@ export default function NotificationsPage() {
         <h1 className={styles.headerTitle}>Notifications</h1>
       </header>
 
+      {loading && <p style={{ textAlign: 'center' }}>Loading...</p>}
+
+      {!loading && notifications.length === 0 && (
+        <p style={{ textAlign: 'center', color: '#888', marginTop: '2rem' }}>
+          No notifications yet.
+        </p>
+      )}
+
       <div className={styles.list}>
-        {mockNotifications.map(notif => (
-          <div key={notif.id} className={notif.read ? styles.item : styles.itemUnread}>
+        {notifications.map(notif => (
+          <div key={notif._id} className={notif.read ? styles.item : styles.itemUnread}>
             <p className={styles.text}>{notif.text}</p>
-            <p className={styles.time}>{notif.time}</p>
+            <p className={styles.time}>{timeAgo(notif.createdAt)}</p>
           </div>
         ))}
       </div>
