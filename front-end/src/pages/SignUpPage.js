@@ -18,7 +18,7 @@ export default function SignUpPage() {
       return;
     }
 
-    navigate('/verify-email', { state: { email } });
+    navigate('/choose-password', { state: { email } });
   }
 
   return (
@@ -44,7 +44,7 @@ export default function SignUpPage() {
 
           {error && <p className={styles.formError}>{error}</p>}
 
-          <Button type="submit">Verify Email</Button>
+          <Button type="submit">Continue</Button>
         </form>
 
         <p className={styles.footerText}>
