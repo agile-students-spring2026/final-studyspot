@@ -15,6 +15,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
 import User from '../models/User.js';
+import Notification from '../models/Notification.js';
 
 const router = express.Router();
 const SALT_ROUNDS = 10;
@@ -126,6 +127,12 @@ router.post('/signup', signupValidation, async (req, res) => {
       name: email.split('@')[0],
       email,
       password: hashedPassword,
+    });
+
+    // Welcome notification
+    await Notification.create({
+      userId: newUser._id.toString(),
+      text: 'Welcome to StudySpot! Start exploring study spaces near you.',
     });
 
     // Generate JWT

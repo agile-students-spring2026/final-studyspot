@@ -7,6 +7,7 @@ import spotsRouter from './routes/spots.js';
 import usersRouter from './routes/users.js';
 import savedRouter from './routes/saved.js';
 import authRouter from './routes/auth.js';
+import notificationsRouter from './routes/notifications.js';
 import { destroySession } from './utils/session.js';
 import authMiddleware from './middleware/auth.js';
 
@@ -40,6 +41,7 @@ app.use('/api/studyspots', spotsRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/users', savedRouter);
+app.use('/api/users', notificationsRouter);
 
 // POST /api/auth/signout — log out current user
 app.post('/api/auth/signout', authMiddleware, (req, res) => {
