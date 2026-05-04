@@ -1,0 +1,20 @@
+services:
+  backend:
+    build: ./back-end
+    env_file: ./back-end/.env
+    volumes:
+      - uploads:/app/public/uploads
+    expose:
+      - "5001"
+    restart: unless-stopped
+
+  frontend:
+    build: ./front-end
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  uploads:
