@@ -128,8 +128,7 @@
   align-items: center;
   justify-content: center;
   background: var(--color-bg);
-  color: var(--color-text-secondary);
-  font-size: 14px;
+  color: #C5C3BD;
 }
 
 .cardBody {
