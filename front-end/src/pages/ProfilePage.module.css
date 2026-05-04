@@ -2,6 +2,8 @@
     min-height: 100vh;
     background: var(--color-bg);
     padding-bottom: 80px;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .header {
