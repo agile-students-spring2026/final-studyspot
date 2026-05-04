@@ -8,7 +8,6 @@ export default function SavedSpotsPage() {
     const navigate = useNavigate();
     const [savedSpots, setSavedSpots] = useState([]);
     const [showConfirm, setShowConfirm] = useState(null);
-    const [showSuccess, setShowSuccess] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -35,7 +34,6 @@ export default function SavedSpotsPage() {
         }
         setSavedSpots(prev => prev.filter(spot => (spot._id || spot.id) !== spotId));
         setShowConfirm(null);
-        setShowSuccess(true);
     }
 
     return (
