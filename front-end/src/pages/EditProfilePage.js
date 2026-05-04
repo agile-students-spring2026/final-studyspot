@@ -37,7 +37,8 @@ export default function EditProfilePage() {
                 return;
             }
         } catch {
-            // If API fails, still save locally so the UI reflects the change
+            setError('Could not connect to server. Please try again.');
+            return;
         }
         localStorage.setItem('userName', name);
         localStorage.setItem('userEmail', email);
