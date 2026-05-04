@@ -87,6 +87,7 @@ export default function SpotListPage() {
         method: isSaved ? 'DELETE' : 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (!isSaved) localStorage.setItem('hasUnreadNotifications', 'true');
     } catch {}
   }
 
