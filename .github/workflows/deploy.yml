@@ -24,12 +24,12 @@ jobs:
 
             echo "==> Rebuilding frontend"
             cd front-end
-            npm ci
+            npm install
             npm run build
 
             echo "==> Updating backend dependencies"
             cd ../back-end
-            npm ci --omit=dev
+            npm install --omit=dev
 
             echo "==> Restarting app"
             pm2 restart studyspot --update-env
