@@ -38,6 +38,17 @@ export default function ProfilePage() {
                 }
             })
             .catch(() => {});
+
+        fetch('/api/users/me/notifications', {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then(res => res.ok ? res.json() : { notifications: [] })
+            .then(data => {
+                const anyUnread = (data.notifications || []).some(n => !n.read);
+                setHasUnread(anyUnread);
+                localStorage.setItem('hasUnreadNotifications', anyUnread ? 'true' : 'false');
+            })
+            .catch(() => {});
     }, []);
 
     function handleDeleteAccount() {

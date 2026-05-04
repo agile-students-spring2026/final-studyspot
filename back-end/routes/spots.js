@@ -1,12 +1,26 @@
 // Routes for study spot search, filtering, detail retrieval,
 // busyness updates, and reviews.
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { body, query, validationResult } from 'express-validator';
 import Spot from '../models/Spot.js';
 import Review from '../models/Review.js';
+import Notification from '../models/Notification.js';
 import multer from 'multer';
 import path from 'path';
 import authMiddleware from '../middleware/auth.js';
+
+function optionalAuth(req, res, next) {
+  const header = req.headers['authorization'];
+  const token = header && header.split(' ')[1];
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.userId = decoded.userId;
+    } catch {}
+  }
+  next();
+}
 
 const router = express.Router();
 
@@ -208,7 +222,7 @@ const reviewValidation = [
     .trim(),
 ];
 
-router.post('/:spotId/reviews', reviewValidation, async (req, res) => {
+router.post('/:spotId/reviews', optionalAuth, reviewValidation, async (req, res) => {
   // Return validation errors if any
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -238,6 +252,13 @@ router.post('/:spotId/reviews', reviewValidation, async (req, res) => {
     spot.rating = Math.round(avg * 10) / 10;
     spot.reviewCount = allReviews.length;
     await spot.save();
+
+    if (req.userId) {
+      Notification.create({
+        userId: req.userId,
+        text: `Thanks for rating "${spot.name}"! Your review helps other students find great spots.`,
+      }).catch(() => {});
+    }
 
     res.status(201).json({ message: 'Review submitted.', review });
   } catch (error) {

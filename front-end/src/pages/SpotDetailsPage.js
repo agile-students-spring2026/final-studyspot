@@ -105,6 +105,7 @@ export default function SpotDetailsPage() {
         setDisplayRating(updatedSpot.rating);
         setDisplayReviewCount(updatedSpot.reviewCount);
       }
+      localStorage.setItem('hasUnreadNotifications', 'true');
     } catch (err) {
       console.warn('Could not submit review:', err);
     }
@@ -174,6 +175,7 @@ export default function SpotDetailsPage() {
                     method: 'POST',
                     headers: { Authorization: `Bearer ${token}` },
                   });
+                  localStorage.setItem('hasUnreadNotifications', 'true');
                 } catch {}
               } else {
                 setSaved(false);

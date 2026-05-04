@@ -16,6 +16,7 @@ import mongoose from 'mongoose';
 import { MOCK_SPOTS } from '../data/mockSpots.js';
 import SavedSpot from '../models/SavedSpot.js';
 import Spot from '../models/Spot.js';
+import Notification from '../models/Notification.js';
 import authMiddleware from '../middleware/auth.js';
 
 const router = express.Router();
@@ -62,6 +63,10 @@ router.post('/me/saved/:spotId', authMiddleware, async (req, res) => {
       return res.status(409).json({ error: 'Spot already saved.' });
     }
     await SavedSpot.create({ userId: req.userId, spotId });
+    Notification.create({
+      userId: req.userId,
+      text: `You saved "${spot.name}" to your study spots.`,
+    }).catch(() => {});
     res.json({ message: 'Spot saved.', spot });
   } catch (err) {
     res.status(500).json({ error: 'Server error.' });
