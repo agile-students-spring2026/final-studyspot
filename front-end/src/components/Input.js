@@ -21,6 +21,7 @@ export default function Input({
   error,
   autoFocus,
   maxLength,
+  required,
 }) {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === 'password';
@@ -38,6 +39,7 @@ export default function Input({
           onChange={onChange}
           autoFocus={autoFocus}
           maxLength={maxLength}
+          required={required}
         />
         {isPassword && (
           <button
