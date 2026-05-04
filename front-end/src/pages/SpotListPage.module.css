@@ -121,6 +121,17 @@
   display: block;
 }
 
+.cardImgPlaceholder {
+  width: 100%;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
 .cardBody {
   padding: var(--space-4) var(--space-5);
 }

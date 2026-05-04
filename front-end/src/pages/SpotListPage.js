@@ -159,11 +159,9 @@ export default function SpotListPage() {
               <h2 className={styles.cardTitle}>{spot.name}</h2>
               <p className={styles.cardSubtitle}>{spot.building} · {spot.address}</p>
             </div>
-            <img
-              src={spot.imageUrl}
-              alt={spot.name}
-              className={styles.cardImg}
-            />
+            {spot.imageUrl
+              ? <img src={spot.imageUrl} alt={spot.name} className={styles.cardImg} />
+              : <div className={styles.cardImgPlaceholder}>No photo yet</div>}
             <div className={styles.cardBody}>
               <p className={styles.cardDesc}>{spot.description}</p>
               <div className={styles.cardActions}>
