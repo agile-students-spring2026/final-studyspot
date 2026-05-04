@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 import BottomNav from '../components/BottomNav';
 import styles from './SavedSpotsPage.module.css';
 
 export default function SavedSpotsPage() {
+    const navigate = useNavigate();
     const [savedSpots, setSavedSpots] = useState([]);
     const [showConfirm, setShowConfirm] = useState(null);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -64,11 +66,16 @@ export default function SavedSpotsPage() {
                             {spot.reviewCount ? ` - ${spot.reviewCount} reviews` : ''}
                         </p>
                     </div>
-                    {spot.image && <img src={spot.image} alt={spot.name} className={styles.spotImage} />}
+                    {spot.imageUrl && <img src={spot.imageUrl} alt={spot.name} className={styles.spotImage} />}
                     {spot.description && <p className={styles.spotDescription}>{spot.description}</p>}
-                    <Button variant="secondary" onClick={() => setShowConfirm(id)}>
-                        Remove from Saved Spots
-                    </Button>
+                    <div className={styles.cardActions}>
+                        <Button variant="compact" onClick={() => navigate(`/spots/${id}`, { state: { spot } })}>
+                            View
+                        </Button>
+                        <Button variant="compactOutline" onClick={() => setShowConfirm(id)}>
+                            Remove
+                        </Button>
+                    </div>
                     </div>
                 );
             })}

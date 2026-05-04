@@ -66,6 +66,12 @@
     background: var(--color-border);
 }
 
+.cardActions {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
 .spotDescription {
     font-size: 0.9rem;
     color: var(--color-text-secondary);
