@@ -47,7 +47,7 @@
 }
 
 .spotName {
-    font-family: var(--font-body);
+    font-family: var(--font-display);
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0;
