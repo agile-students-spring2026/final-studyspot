@@ -1,0 +1,37 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            set -e
+            cd /var/www/studyspot
+
+            echo "==> Pulling latest code"
+            git pull origin master
+
+            echo "==> Rebuilding frontend"
+            cd front-end
+            npm ci
+            npm run build
+
+            echo "==> Updating backend dependencies"
+            cd ../back-end
+            npm ci --omit=dev
+
+            echo "==> Restarting app"
+            pm2 restart studyspot --update-env
+
+            echo "==> Deploy complete"
