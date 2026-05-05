@@ -64,7 +64,7 @@ function mapMicroLocationsToAreas(microLocations = []) {
 export default function SpotDetailsPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { spotId } = useParams();
+  const { id: spotId } = useParams();
 
   const initialSpot = location.state?.spot ?? null;
   const [spotData, setSpotData] = useState(initialSpot);
